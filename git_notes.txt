@@ -1,0 +1,39 @@
+git checkout instructions
+
+Fork on GitHub (click Fork button)
+Clone to computer 
+$ git clone git@github.com:[you]/S-Pi-Watch.git
+replace [you] with your Github username
+Don’t forget to cd into your repo:
+$ cd S-Pi-Watch
+
+Set up remote upstream
+$ git remote add upstream git@github.com:Team-B-Capstone/S-Pi-Watch.git
+$ git checkout develop
+
+
+Start working on a new issue or feature 
+$ git fetch upstream
+$ git checkout -b 100-description upstream/develop
+naming convention is [issuenumber]-[description]
+
+Develop on the feature.
+$ git add changed/file 
+$ git commit -m "commit message"
+
+Push branch to your fork on GitHub
+$ git push -f origin 100-description
+just to stop you from losing your changes in the event of data loss on your local machine
+
+Fetch upstream 
+$ git fetch upstream
+Ensure feature branch and rebase.
+$ git checkout 100-description 
+$ git rebase upstream/develop
+
+Edit Changelog.md adding a line describing your change in the appropriate section
+Rebase develop in to feature branch. -i allows you to clean your commits history
+$ git rebase -i upstream/develop
+Publish feature branch to Github 
+$ git push -f origin 100-description
+Issue pull request for develop branch (Click Pull Request button)
