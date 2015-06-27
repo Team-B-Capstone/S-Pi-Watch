@@ -16,7 +16,6 @@ import android.widget.Button;
 
 
 public class MainActivity extends ActionBarActivity {
-
     protected void addNotification() {
         int notificationId = 001;
 
@@ -24,7 +23,12 @@ public class MainActivity extends ActionBarActivity {
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle("ALERT:")
-                        .setContentText("\nPATIENT ID: \nROOM #:   \n[Extra Patient Information]");
+                        .setContentText("\nPATIENT ID: \nROOM #:   \n[Extra Patient Information]")
+
+                        //The vibration pattern goes {Start delay, Vibration length, Sleep time, Vibration length}
+                        //This pattern starts instantly, vibrates for 3 seconds, waits 1 second then vibrates for 3 seconds again.
+                        .setVibrate(new long[]{0, 3000, 1000, 3000});
+
 
         // Get an instance of the NotificationManager service
         NotificationManagerCompat notificationManager =
