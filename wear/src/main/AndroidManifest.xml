@@ -3,6 +3,7 @@
     package="edu.pdx.team_b_capstone2015.s_pi_watch" >
 
     <uses-feature android:name="android.hardware.type.watch" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
