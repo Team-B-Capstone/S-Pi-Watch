@@ -1,7 +1,10 @@
 package edu.pdx.team_b_capstone2015.s_pi_watch;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -13,9 +16,33 @@ import android.support.v4.app.NotificationCompat.WearableExtender;
 import android.app.Notification;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 
-public class MainActivity extends ActionBarActivity {
+
+public class MainActivity extends Activity {
+    public final static String apiURL = "http://s-pi-demo.com/api/patients/";
+    public final static String EXTRA_MESSAGE = "edu.pdx.team_b_capstone2015.s_pi_watch.MESSAGE";
+
+    public void getPatients(View view) {
+        //assign text field to var
+        EditText editText = (EditText) findViewById(R.id.patient_id);
+        //get a string from that text field
+        String patient = editText.getText().toString();
+        String urlString = apiURL + patient;
+        new CallAPI().execute(urlString);
+
+    }
+
     protected void addNotification() {
         int notificationId = 001;
 
@@ -112,4 +139,87 @@ public class MainActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    //parses the REST API response
+    private class patientResults {
+        public String statusNbr;
+        public String hygieneResult;
+    }
+
+    //separate thread to call REST API
+    private class CallAPI extends AsyncTask<String, String, String> {
+
+        //Executes in a separate thread
+        @Override
+        protected String doInBackground(String... params) {
+            String urlString=params[0]; // URL to call
+            String resultToDisplay;
+            InputStream in;
+            // HTTP Get
+            try {
+                URL url = new URL(urlString);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                in = urlConnection.getInputStream();
+                //in = new BufferedInputStream(urlConnection.getInputStream());
+
+            } catch (Exception e ) {
+                System.out.println(e.getMessage());
+                return e.getMessage();
+            }
+            //parse the results here......
+            resultToDisplay = convertStreamToString(in);
+
+            return resultToDisplay.toString();
+        }
+        String convertStreamToString(java.io.InputStream is) {
+            java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+            return s.hasNext() ? s.next() : "";
+        }
+        //executes in context of UI thread, executes after the API call has completed.
+        protected void onPostExecute(String result) {
+            //Create a intent that opens the results activity
+            Intent intent = new Intent(getApplicationContext(), TestResultsActivity.class);
+            //add the string to the intent.
+            intent.putExtra(EXTRA_MESSAGE, result);
+            //start the Activity
+            startActivity(intent);
+        }
+
+    } // end CallAPI
+
+//    //Function to parse an XML file (Don't need this
+//    private patientResults parseXML( XmlPullParser parser ) throws XmlPullParserException, IOException {
+//
+//        int eventType = parser.getEventType();
+//        patientResults result = new patientResults();
+//
+//        while( eventType!= XmlPullParser.END_DOCUMENT) {
+//            String name = null;
+//
+//            switch(eventType)
+//            {
+//                case XmlPullParser.START_TAG:
+//                    name = parser.getName();
+//
+//                    if( name.equals("Error")) {
+//                        System.out.println("Web API Error!");
+//                    }
+//                    else if ( name.equals("StatusNbr")) {
+//                        result.statusNbr = parser.nextText();
+//                    }
+//                    else if (name.equals("HygieneResult")) {
+//                        result.hygieneResult = parser.nextText();
+//                    }
+//
+//                    break;
+//
+//                case XmlPullParser.END_TAG:
+//                    break;
+//            } // end switch
+//
+//            eventType = parser.next();
+//        } // end while
+//
+//        return result;
+//    }
 }

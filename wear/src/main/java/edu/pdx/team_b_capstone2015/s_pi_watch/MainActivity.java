@@ -24,20 +24,7 @@ public class MainActivity extends Activity {
 
         final Resources res = getResources();
         final GridViewPager pager = (GridViewPager) findViewById(R.id.pager);
-//        pager.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
-//            @Override
-//            public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
-//                int rowMargin = res.getDimensionPixelOffset(R.dimen.page_row_margin);
-//                int colMargin = res.getDimensionPixelOffset(R.dimen.page_column_margin);
-//                pager.setPageMargins(rowMargin, colMargin);
-//
-//                // GridViewPager relies on insets to properly handle
-//                // layout for round displays. They must be explicitly
-//                // applied since this listener has taken them over.
-//                pager.onApplyWindowInsets(insets);
-//                return insets;
-//            }
-//        });
+
         //sets the adapter for the pager
         pager.setAdapter(new PatientViewAdapter(this, getFragmentManager()));
         DotsPageIndicator dotsPageIndicator = (DotsPageIndicator) findViewById(R.id.page_indicator);

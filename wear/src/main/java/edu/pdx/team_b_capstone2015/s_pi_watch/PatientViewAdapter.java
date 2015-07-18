@@ -40,6 +40,7 @@ public class PatientViewAdapter extends FragmentGridPagerAdapter {
     public PatientViewAdapter(Context ctx, FragmentManager fm) {
         super(fm);
         mContext = ctx;
+
         //list of rows for this adapter
         mRows = new ArrayList<PatientViewAdapter.Row>();
 

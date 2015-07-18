@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="edu.pdx.team_b_capstone2015.s_pi_watch" >
-    <uses-permission android:name="android.permission.VIBRATE"/>
+
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -16,6 +18,10 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".TestResultsActivity"
+            android:label="@string/title_activity_test_results" >
         </activity>
     </application>
 
