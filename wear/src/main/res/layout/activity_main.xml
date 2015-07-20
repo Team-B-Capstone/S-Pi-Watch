@@ -4,11 +4,25 @@
     android:layout_height="match_parent"
     android:minHeight="300dp">
 
+    <TextView
+        android:id="@+id/intro"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:textSize="20sp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:gravity="center"
+        android:fontFamily="sans-serif-condensed-light"
+        android:textColor="@android:color/white"
+        android:text="Waiting for data..." />
+
     <android.support.wearable.view.GridViewPager
         android:id="@+id/pager"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:keepScreenOn="true" />
+        android:keepScreenOn="true"
+        android:visibility="invisible"/>
 
     <android.support.wearable.view.DotsPageIndicator
         android:id="@+id/page_indicator"

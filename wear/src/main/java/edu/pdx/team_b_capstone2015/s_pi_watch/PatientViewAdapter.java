@@ -16,8 +16,6 @@ import android.support.wearable.view.FragmentGridPagerAdapter;
 import android.support.wearable.view.GridPagerAdapter;
 import android.util.Log;
 
-import com.google.android.gms.wearable.DataItemAsset;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

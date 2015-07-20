@@ -47,7 +47,7 @@ public class MobileListenerService extends WearableListenerService
     private static final String WEIGHT = "weight";
     private static final String HEART_RATE = "heart-rate";
     private static final String P_ID= "patient_id";
-
+    private static final String[] keys = {NAME,BED,ID,AGE,TEMP,HEIGHT,BP,STATUS,CASE_ID,H_ID,CARDIAC,ALLERGIES,WEIGHT,HEART_RATE,P_ID};
     private GoogleApiClient mGoogleApiClient;
     private static final String TAG = "SPIMobileService";
 
@@ -77,14 +77,14 @@ public class MobileListenerService extends WearableListenerService
             Log.d(TAG, "onDataChanged: " + dataEvents + " for " + getPackageName());
         }
         for (DataEvent event : dataEvents) {
-            Log.d(TAG, "URI path: " + event.getDataItem().getUri().getPath().toString());
+            Log.d(TAG, "URI path: " + event.getDataItem().getUri().getPath());
 
             if (event.getType() == DataEvent.TYPE_DELETED) {
                 Log.i(TAG, event + " deleted");
             } else if (event.getType() == DataEvent.TYPE_CHANGED) {//Indicates that the enclosing DataEvent was triggered by a data item being added or changed.
                 //get a data item from the data map
 
-                if(event.getDataItem().getUri().getPath().toString().contentEquals(PATH_QUERY_STATUS)){
+                if(event.getDataItem().getUri().getPath().contentEquals(PATH_QUERY_STATUS)){
                     Log.i(TAG,"query status changed");
                     Boolean queryServer = DataMap.fromByteArray(event.getDataItem().getData()).get(FIELD_QUERY_ON);
                     if (queryServer) {
@@ -100,7 +100,7 @@ public class MobileListenerService extends WearableListenerService
                         // stop querying the server for updates.
                     }
                 }
-                if(event.getDataItem().getUri().getPath().toString().contentEquals(PATH_PATIENTS)){
+                if(event.getDataItem().getUri().getPath().contentEquals(PATH_PATIENTS)){
                     Log.i(TAG, "Patient data changed");
                 }
             }
@@ -151,7 +151,7 @@ public class MobileListenerService extends WearableListenerService
         //send each patient
 
         for(PutDataMapRequest p : parseJS(result)){
-            Log.d(TAG, "Puting " + p.getUri().getPath().toString());
+            Log.d(TAG, "Puting " + p.getUri().getPath());
             Wearable.DataApi.putDataItem(mGoogleApiClient, p.asPutDataRequest()).await();
         }
 
@@ -173,27 +173,19 @@ public class MobileListenerService extends WearableListenerService
         DataMap data;
         //Parse json
         //Create JSON object
-        JSONObject jObject, patient;
+        JSONObject allPatients, patient;
         try {
-            jObject = new JSONObject(result);
-            for (int i = 1; i < 5; i++){
-                patient = new JSONObject(jObject.getString((new Integer(i)).toString()));
-                PutDataMapRequest put = PutDataMapRequest.create(PATH_PATIENT+Integer.toString(i));
-                put.getDataMap().putString(NAME, patient.getString(NAME));
-                put.getDataMap().putString(BED, patient.getString(BED));
-                put.getDataMap().putString(ID, patient.getString(ID));
-                put.getDataMap().putString(AGE, patient.getString(AGE));
-                put.getDataMap().putString(TEMP, patient.getString(TEMP));
-                put.getDataMap().putString(HEIGHT, patient.getString(HEIGHT));
-                put.getDataMap().putString(WEIGHT, patient.getString(WEIGHT));
-                put.getDataMap().putString(BP, patient.getString(BP));
-                put.getDataMap().putString(HEART_RATE, patient.getString(HEART_RATE));
-                put.getDataMap().putString(STATUS, patient.getString(STATUS));
-                put.getDataMap().putString(CASE_ID, patient.getString(CASE_ID));
-                put.getDataMap().putString(H_ID, patient.getString(H_ID));
-                put.getDataMap().putString(CARDIAC, patient.getString(CARDIAC));
-                put.getDataMap().putString(ALLERGIES, patient.getString(ALLERGIES));
-                put.getDataMap().putString(P_ID, patient.getString(P_ID));
+            allPatients = new JSONObject(result);
+            for (int i = 0; i < 4; i++){
+                patient = new JSONObject(allPatients.getString( Integer.toString(i+1) )); //patient ids are 1-4 in json
+                PutDataMapRequest put = PutDataMapRequest.create(PATH_PATIENT + Integer.toString(i));//patient paths are /patient0 - /patient3
+                for(String k : keys){
+                    if(k.contains(TEMP)){
+                        put.getDataMap().putString(k, Integer.toString(Double.valueOf(patient.getString(k)).intValue())); //temp needs to be a int
+                    }else {
+                        put.getDataMap().putString(k, patient.getString(k));
+                    }
+                }
                 putDataMapRequest.add(put);
             }
 
