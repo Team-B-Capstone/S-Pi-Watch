@@ -18,10 +18,10 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-/**
- * Created by joel on 6/25/15.
- */
+import static edu.pdx.team_b_capstone2015.s_pi_watch.MainActivity.*;
+
 public class PatientViewAdapter extends FragmentGridPagerAdapter {
     //final Context mContext;
 
@@ -40,31 +40,28 @@ public class PatientViewAdapter extends FragmentGridPagerAdapter {
     public PatientViewAdapter(Context ctx, FragmentManager fm) {
         super(fm);
         mContext = ctx;
+
         //list of rows for this adapter
         mRows = new ArrayList<PatientViewAdapter.Row>();
+        for(int i = 0; i < MAX_PATIENTS ; i++){
+            if(patientData.get(i)!= null){
+                Map<String,String> p = patientData.get(i);
 
-        //additional columns are added by including additional cardFragments to the row.
-        mRows.add(new Row(
-                cardFragment("Mr. Patient 1","Male \nAdult \nBed #231 \n"),
-                cardFragment("Patient Vitals","Temp: 98 \nHeart Rate: 90 \nBlood Pressure: 160/90 \n" ),
-                cardFragment("Alerts", "NONE"),
-                new CustomFragment(),
-                new CustomFragment2()));
-        mRows.add(new Row(
-                cardFragment("Mr. Patient 2","Male \nAdult \nBed #232 \n"),
-                cardFragment("Patient Vitals","Temp: 98 \nHeart Rate: 90 \nBlood Pressure: 160/90 \n" ),
-                cardFragment("Alerts", "NONE"),
-                new CustomFragment()));
-        mRows.add(new Row(
-                cardFragment("Ms. Patient 3","Female \nAdult \nBed #233 \n"),
-                cardFragment("Patient Vitals","Temp: 98 \nHeart Rate: 90 \nBlood Pressure: 160/90 \n" ),
-                cardFragment("Alerts", "NONE"),
-                new CustomFragment()));
-        mRows.add(new Row(
-                cardFragment("Mr. Patient 4","Male \nAdult \nBed #665 \n"),
-                cardFragment("Patient Vitals","Temp: 70 \nHeart Rate: 0 \nBlood Pressure: 0/0 \n" ),
-                cardFragment("Alerts", "CODE: BLUE"),
-                new CustomFragment()));
+                mRows.add(new Row(
+                        cardFragment(p.get(NAME),"Patient ID: "+p.get(P_ID)
+                                        +"\nBed: "+p.get(BED)
+                                        +"\nStatus: "+p.get(STATUS)),
+                        cardFragment("Patient Vitals", "Heart Rate: "+p.get(HEART_RATE)
+                                        +"\nBlood Pressure: "+p.get(BP)
+                                        +"\nTemp: "+p.get(TEMP)),
+                        cardFragment("Alerts", "TO BE IMPLEMENTED LATER"),//need integration with alert notifications
+                        cardFragment("Clinical Data", "Height: "+p.get(HEIGHT)
+                                        +"\nWeight: "+p.get(WEIGHT)
+                                        +"\nAllergies: "+p.get(ALLERGIES)),
+                        new CustomFragment(),
+                        new CustomFragment2()));
+            }
+        }
 
         mRows.add(new Row(cardFragment(R.string.dismiss_title, R.string.dismiss_text)));
 
