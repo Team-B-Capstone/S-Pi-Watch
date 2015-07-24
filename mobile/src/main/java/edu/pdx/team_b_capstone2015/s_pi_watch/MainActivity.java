@@ -118,9 +118,6 @@ public class MainActivity extends Activity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // register local device with google cloud server
-        registerWithGC();
-
         Button mButton = (Button) findViewById(R.id.button);
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -129,6 +126,9 @@ public class MainActivity extends Activity{
                 addNotification();
             }
         });
+
+        // register local device with google cloud server
+        registerWithGC();
     }
 
     // registers the local device with google cloud server
@@ -143,7 +143,7 @@ public class MainActivity extends Activity{
                 // skeleton code around in case was want it later (it is kind of nice!)
 //                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 //                boolean sentToken = sharedPreferences
-//                        .getBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, false);
+//                        .getBoolean(GcmPreferences.SENT_TOKEN_TO_SERVER, false);
 //                if (sentToken) {
 //                    mInformationTextView.setText(getString(R.string.gcm_send_message));
 //                } else {
