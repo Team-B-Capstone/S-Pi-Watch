@@ -26,6 +26,7 @@ import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
@@ -68,12 +69,10 @@ public class SpiGcmListenerService extends GcmListenerService {
     public void onMessageReceived(String from, Bundle data) {
         //DEBUG
         String message = data.getString("message");
-        Log.d(TAG, "From: " + from);
         Log.d(TAG, "Message: " + message);
-
         Map<String, String> alert;
-        if (data.getString("title").contentEquals("SPI ALERT") && GcmPreferences.alertsActive) {
-
+        if (data.getString("title").contentEquals("SPI ALERT")
+                && PreferenceManager.getDefaultSharedPreferences(this).getBoolean("pref_GCMNotifications", false)) {
             alert = parseJSON(data.getString("message"));
             // set the Title
             //alert.put(TITLE, "ALERT: ");
@@ -82,6 +81,7 @@ public class SpiGcmListenerService extends GcmListenerService {
 
 
     }
+
     // [END receive_message]
 
 //    private void sendNotification(Map<String, String> alert) {
@@ -139,10 +139,10 @@ public class SpiGcmListenerService extends GcmListenerService {
                         .setContentTitle("ALERT:")
                         .setContentText("\nPATIENT ID: " + alert.get(ID) +
                                 "\nTS: " + alert.get(TS) +
-                                "\nSIGNAME: "+ alert.get(SIGNAME)+
-                                "\nINTERVAL: "+alert.get(INTERVAL)+
-                                "\nALERT_MSG: "+alert.get(ALERT_MSG)+
-                                "\nACTION_MSG: "+alert.get(ACTION_MSG))
+                                "\nSIGNAME: " + alert.get(SIGNAME) +
+                                "\nINTERVAL: " + alert.get(INTERVAL) +
+                                "\nALERT_MSG: " + alert.get(ALERT_MSG) +
+                                "\nACTION_MSG: " + alert.get(ACTION_MSG))
 
                                 //The vibration pattern goes {Start delay, Vibration length, Sleep time, Vibration length}
                                 //This pattern starts instantly, vibrates for 3 seconds, waits 1 second then vibrates for 3 seconds again.

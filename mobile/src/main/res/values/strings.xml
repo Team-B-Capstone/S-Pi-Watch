@@ -3,4 +3,6 @@
     <string name="action_settings">Settings</string>
     <string name="enable_alerts">Disable GCM Alerts</string>
     <string name="disable_alerts">Enable GCM Alerts</string>
+    <string name="GCM_notifications">pref_GCMNotifications</string>
+
 </resources>
