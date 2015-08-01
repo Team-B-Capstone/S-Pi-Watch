@@ -16,9 +16,49 @@
     <Button
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Send Notification"
+        android:text="Register with GCM"
         android:id="@+id/button"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/textView" />
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="unRegister with GCM"
+        android:id="@+id/unregbutton"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/button" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send message"
+        android:id="@+id/button2"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/unregbutton"
+        android:layout_alignEnd="@+id/button"
+        android:onClick="sendMessage"
+        android:focusableInTouchMode="false"
+        android:visibility="invisible" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/outMessage"
+        android:layout_below="@+id/button2"
+        android:layout_alignParentStart="true"
+        android:layout_alignEnd="@+id/button2"
+        android:hint="Message to Send"
+        android:visibility="invisible" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Incoming Messages"
+        android:id="@+id/messages"
+        android:layout_below="@+id/outMessage"
+        android:layout_alignParentBottom="true"
+        android:layout_alignEnd="@+id/outMessage"
+        android:layout_alignParentStart="true"
+        android:visibility="invisible" />
 
 </RelativeLayout>

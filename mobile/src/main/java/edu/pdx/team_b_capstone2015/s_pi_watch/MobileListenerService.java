@@ -143,7 +143,8 @@ public class MobileListenerService extends WearableListenerService
         }
 
         PutDataMapRequest put = PutDataMapRequest.create(PATH_PATIENTS);
-        put.getDataMap().putString("json", result);//json string of all patient data
+        //put.getDataMap().putString("json", result);//json string of all patient data
+        //need to change to a message event.
         put.getDataMap().putString("event", this.toString());//forces update of patients
         DataApi.DataItemResult status =
                 Wearable.DataApi.putDataItem(mGoogleApiClient, put.asPutDataRequest()).await();

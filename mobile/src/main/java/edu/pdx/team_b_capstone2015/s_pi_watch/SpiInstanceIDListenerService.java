@@ -26,7 +26,7 @@ import com.google.android.gms.iid.InstanceIDListenerService;
 
 public class SpiInstanceIDListenerService extends InstanceIDListenerService {
 
-    private static final String TAG = "MyInstanceIDLS";
+    private static final String TAG = "SPIMyInstanceIDLS";
 
     /**
      * Called if InstanceID token is updated. This may occur if the security of
@@ -37,7 +37,19 @@ public class SpiInstanceIDListenerService extends InstanceIDListenerService {
     @Override
     public void onTokenRefresh() {
         // Fetch updated Instance ID token and notify our app's server of any changes (if applicable).
+
+        //notify server to remove old id.
+
+        Log.i(TAG, "GCM: Updating ID");
+
         Intent intent = new Intent(this, SpiRegistrationIntentService.class);
+        intent.setAction("UNREGISTER");
+        startService(intent);
+
+
+        //register new id
+        intent = new Intent(this, SpiRegistrationIntentService.class);
+        intent.setAction("REGISTER");
         startService(intent);
     }
     // [END refresh_token]
