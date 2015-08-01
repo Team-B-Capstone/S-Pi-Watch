@@ -44,12 +44,32 @@ public class MainActivity extends Activity{
                 registerWithGC();
             }
         });
-
-        Button unregButton = (Button) findViewById(R.id.unregbutton);
+        final Button unregButton = (Button) findViewById(R.id.unregbutton);
+        if(GcmPreferences.alertsActive){
+            unregButton.setText(getString(R.string.enable_alerts));
+        }else{
+            unregButton.setText(getString(R.string.disable_alerts));
+        }
         unregButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                unregisterWithGC();
+                //toggle the alerts active flag
+                if(GcmPreferences.alertsActive){
+                    GcmPreferences.alertsActive = false;
+                }else{
+                    GcmPreferences.alertsActive = true;
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //reset the text on the button.
+                        if(GcmPreferences.alertsActive){
+                            unregButton.setText(getString(R.string.enable_alerts));
+                        }else{
+                            unregButton.setText(getString(R.string.disable_alerts));
+                        }
+                    }
+                });
             }
         });
         // register local device with google cloud server
@@ -93,6 +113,7 @@ public class MainActivity extends Activity{
             startService(GCMRegistration);
         }
     }
+
     protected void unregisterWithGC() {
 
         if (checkPlayServices()) {

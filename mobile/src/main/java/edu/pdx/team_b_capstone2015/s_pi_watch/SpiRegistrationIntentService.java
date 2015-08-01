@@ -115,7 +115,8 @@ public class SpiRegistrationIntentService extends IntentService {
                     Socket clientSocket = new Socket(HOST, PORT);
 //                    Socket clientSocket = new Socket("131.252.208.103", PORT);
                     DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-                    outToServer.writeBytes("STRT"+registrationToken);
+                    //outToServer.writeBytes("STRT"+registrationToken);
+                    outToServer.writeBytes(registrationToken);
                     outToServer.flush();
                     //outToServer.close();
 

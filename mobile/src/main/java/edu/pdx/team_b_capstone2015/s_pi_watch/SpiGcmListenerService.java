@@ -72,7 +72,7 @@ public class SpiGcmListenerService extends GcmListenerService {
         Log.d(TAG, "Message: " + message);
 
         Map<String, String> alert;
-        if (data.getString("title").contentEquals("SPI ALERT")) {
+        if (data.getString("title").contentEquals("SPI ALERT") && GcmPreferences.alertsActive) {
 
             alert = parseJSON(data.getString("message"));
             // set the Title
@@ -137,11 +137,16 @@ public class SpiGcmListenerService extends GcmListenerService {
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle("ALERT:")
-                        .setContentText("\nPATIENT ID: " + alert.get(ID))
+                        .setContentText("\nPATIENT ID: " + alert.get(ID) +
+                                "\nTS: " + alert.get(TS) +
+                                "\nSIGNAME: "+ alert.get(SIGNAME)+
+                                "\nINTERVAL: "+alert.get(INTERVAL)+
+                                "\nALERT_MSG: "+alert.get(ALERT_MSG)+
+                                "\nACTION_MSG: "+alert.get(ACTION_MSG))
 
                                 //The vibration pattern goes {Start delay, Vibration length, Sleep time, Vibration length}
                                 //This pattern starts instantly, vibrates for 3 seconds, waits 1 second then vibrates for 3 seconds again.
-                        .setVibrate(new long[]{0, 3000, 1000, 3000});
+                        .setVibrate(new long[]{0, 1000, 1000, 1000});
 
 
         // Get an instance of the NotificationManager service
@@ -189,5 +194,6 @@ public class SpiGcmListenerService extends GcmListenerService {
         //notificationManager.notify(notificationId, notification);
        //NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     }
+
 }
 
