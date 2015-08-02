@@ -71,7 +71,7 @@ public class SpiGcmListenerService extends GcmListenerService {
         String message = data.getString("message");
         Log.d(TAG, "Message: " + message);
         Map<String, String> alert;
-        if (data.getString("title").contentEquals("SPI ALERT")
+        if (data.getString("title").contentEquals("SPI ALERT!")
                 && PreferenceManager.getDefaultSharedPreferences(this).getBoolean("pref_GCMNotifications", false)) {
             alert = parseJSON(data.getString("message"));
             // set the Title
