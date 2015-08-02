@@ -47,7 +47,7 @@ public class MainActivity extends Activity {
                 .replace(android.R.id.content, new SettingsFragment())
                 .commit();
     }
-/*
+/*  OLD TEST CODE
         setContentView(R.layout.activity_main);
         //connectWebSocket();
         //sets the preferences on the first startup only.
@@ -105,14 +105,11 @@ public class MainActivity extends Activity {
         super.onRestoreInstanceState(savedInstanceState);
         if(savedInstanceState != null){
             registered = savedInstanceState.getBoolean("registered");
-            //Log.i(TAG, "test being restored to "+ test);
         }
     }
 
     @Override
     protected void onDestroy() {
-        //Log.i(TAG,"closing Websocket");
-        //mWebSocketClient.close();
         super.onDestroy();
 
     }
@@ -120,24 +117,6 @@ public class MainActivity extends Activity {
     // registers the local device with google cloud server
     // allows backend to send messages (alerts!)
     protected void registerWithGC() {
-//        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
-//            @Override
-//            public void onReceive(Context context, Intent intent) {
-//                // TODO: I used to have an info display that would update when the GCM message was
-//                // sent, but it's not necessary at the moment
-//                // however, this abstract class has to be implemented, so I thought I'd keep the
-//                // skeleton code around in case was want it later (it is kind of nice!)
-//                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-//                boolean sentToken = sharedPreferences
-//                        .getBoolean(GcmPreferences.SENT_TOKEN_TO_SERVER, false);
-//                if (sentToken) {
-//                    mInformationTextView.setText(getString(R.string.gcm_send_message));
-//                } else {
-//                    mInformationTextView.setText(getString(R.string.token_error_message));
-//                }
-//            }
-//        };
-
         if (checkPlayServices()) {
             Log.i(TAG, "GCM: Initiating Intent: Registering with GCM");
             // Start IntentService to register this application with GCM.

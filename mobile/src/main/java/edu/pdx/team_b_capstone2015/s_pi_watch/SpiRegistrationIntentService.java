@@ -33,10 +33,9 @@ import java.net.Socket;
 
 public class SpiRegistrationIntentService extends IntentService {
     private static String registrationToken;
-    String HOST = "10.0.0.7";
+    String HOST = "api.s-pi-demo.com";//"10.0.0.7";
     int PORT = 9996;
     private static final String TAG = "SPIRegIntentService";
-    private static final String[] TOPICS = {"global"};
 
     public SpiRegistrationIntentService() {
         super(TAG);
@@ -51,10 +50,6 @@ public class SpiRegistrationIntentService extends IntentService {
                 // In the (unlikely) event that multiple refresh operations occur simultaneously,
                 // ensure that they are processed sequentially.
                 synchronized (TAG) {
-                    // [START register_for_gcm]
-                    // Initially this call goes out to the network to retrieve the token, subsequent calls
-                    // are local.
-                    // [START get_token]
                     InstanceID instanceID = InstanceID.getInstance(this);
                     // project id is: "50371043678"
                     registrationToken = instanceID.getToken("50371043678",
@@ -65,17 +60,6 @@ public class SpiRegistrationIntentService extends IntentService {
                     // send registration token to server
                     sendRegistrationToServer();
 
-                    // Subscribe to topic channels
-//                    while(true) {
-//                        Thread.sleep(3000);
-//                    }
-                    //subscribeTopics(registrationToken);
-
-                    // You should store a boolean that indicates whether the generated token has been
-                    // sent to your server. If the boolean is false, send the token to your server,
-                    // otherwise your server should have already received the token.
-                    //sharedPreferences.edit().putBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, true).apply();
-                    // [END register_for_gcm]
                 }
             } catch (Exception e) {
                 Log.d(TAG, "Failed to complete token refresh", e);
@@ -97,11 +81,6 @@ public class SpiRegistrationIntentService extends IntentService {
             }
             unregisterFromServer();
         }
-
-
-        // Notify UI that registration has completed, so the progress indicator can be hidden.
-        // Intent registrationComplete = new Intent(GcmPreferences.REGISTRATION_COMPLETE);
-        //LocalBroadcastManager.getInstance(this).sendBroadcast(registrationComplete);
     }
     /**
      * Send registration to our servers.
@@ -132,7 +111,7 @@ public class SpiRegistrationIntentService extends IntentService {
             }
         }).start();
     }
-
+    //this is not currently being used.
     private void unregisterFromServer() {
         new Thread(new Runnable() {
             public void run() {
@@ -152,16 +131,4 @@ public class SpiRegistrationIntentService extends IntentService {
             }
         }).start();
     }
-//    /**
-//     * Subscribe to any GCM topics of interest, as defined by the TOPICS constant.
-//     *
-//     * @param token GCM token
-//     * @throws IOException if unable to reach the GCM PubSub service
-//     */
-//    private void subscribeTopics(String token) throws IOException {
-//        for (String topic : TOPICS) {
-//            GcmPubSub pubSub = GcmPubSub.getInstance(this);
-//            pubSub.subscribe(token, "/topics/" + topic, null);
-//        }
-//    }
 }
