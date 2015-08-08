@@ -2,8 +2,10 @@ package edu.pdx.team_b_capstone2015.s_pi_watch;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -23,26 +25,38 @@ import java.net.URISyntaxException;
 
 
 public class MainActivity extends Activity {
-    private static final String TAG = "SPIMAIN";
+    private static final String TAG = "SPI-MAIN";
     private static boolean registered = false;
     // Google Cloud Messaging helper objects:
     //private BroadcastReceiver mRegistrationBroadcastReceiver;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-    private WebSocketClient mWebSocketClient;
-    private static final String WEBSOCKET_HOST = "ws://10.0.07:8080";
-    private boolean alertsActive;
+    //private WebSocketClient mWebSocketClient;
+    //private static final String WEBSOCKET_HOST = "ws://10.0.07:8080";
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //savedInstanceState.
+
+        //detects changes in the preferences to automatically register with a different vertx server.
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(
+                new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,String key) {
+                Log.i(TAG, key+" preference changed");
+                if(key.contentEquals("pref_ipPref")) {
+                    registerWithGC();
+                }
+            }
+        });
+
         if(!registered){
             registerWithGC();
             registered = true;
         }
 
         // Display the fragment as the main content.
+
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new SettingsFragment())
                 .commit();
@@ -157,7 +171,7 @@ public class MainActivity extends Activity {
         }
         return true;
     }
-
+/*  Not yet implemented
     //connect to a websocket
     private void connectWebSocket() {
         URI uri;
@@ -231,7 +245,7 @@ public class MainActivity extends Activity {
             mWebSocketClient.send(editText.getText().toString());
         }
         editText.setText("");
-    }
+    }*/
 
 
 }

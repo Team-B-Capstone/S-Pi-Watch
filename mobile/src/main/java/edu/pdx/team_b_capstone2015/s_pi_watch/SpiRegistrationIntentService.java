@@ -19,6 +19,7 @@ package edu.pdx.team_b_capstone2015.s_pi_watch;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -31,11 +32,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
-public class SpiRegistrationIntentService extends IntentService {
+public class SpiRegistrationIntentService extends IntentService  {
     private static String registrationToken;
-    String HOST = "api.s-pi-demo.com";//"10.0.0.7";
+    private String host;// = "api.s-pi-demo.com";//"10.0.0.7";
     int PORT = 9996;
-    private static final String TAG = "SPIRegIntentService";
+    private static final String TAG = "SPI-RegIntentService";
 
     public SpiRegistrationIntentService() {
         super(TAG);
@@ -44,7 +45,7 @@ public class SpiRegistrationIntentService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         Log.i(TAG, "GCM: Preparing to handle intent");
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        //SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         if(intent.getAction().contentEquals("REGISTER")){
             try {
                 // In the (unlikely) event that multiple refresh operations occur simultaneously,
@@ -87,11 +88,14 @@ public class SpiRegistrationIntentService extends IntentService {
      *
      */
     private void sendRegistrationToServer() {
+        //get the ip for the vertx server from the preferences.
+        host = PreferenceManager.getDefaultSharedPreferences(this).getString("pref_ipPref","api.s-pi-demo.com");
         new Thread(new Runnable() {
             public void run() {
                 try {
-                    Log.i(TAG, "GCM: Sending token to server at host: " + HOST + " and port: " + PORT + ": " + registrationToken);
-                    Socket clientSocket = new Socket(HOST, PORT);
+
+                    Log.i(TAG, "GCM: Sending token to server at host: " + host + " and port: " + PORT + ": " + registrationToken);
+                    Socket clientSocket = new Socket(host, PORT);
 //                    Socket clientSocket = new Socket("131.252.208.103", PORT);
                     DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
                     //outToServer.writeBytes("STRT"+registrationToken);
@@ -116,8 +120,8 @@ public class SpiRegistrationIntentService extends IntentService {
         new Thread(new Runnable() {
             public void run() {
                 try {
-                    Log.i(TAG, "GCM: stopping gcm server at host: " + HOST + " and port: " + PORT + ": " + registrationToken);
-                    Socket clientSocket = new Socket(HOST, PORT);
+                    Log.i(TAG, "GCM: stopping gcm server at host: " + host + " and port: " + PORT + ": " + registrationToken);
+                    Socket clientSocket = new Socket(host, PORT);
                     DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
                     outToServer.writeBytes("STOP" + registrationToken);
                     outToServer.flush();
@@ -131,4 +135,5 @@ public class SpiRegistrationIntentService extends IntentService {
             }
         }).start();
     }
+
 }

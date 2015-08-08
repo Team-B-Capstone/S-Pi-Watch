@@ -16,32 +16,18 @@
 
 package edu.pdx.team_b_capstone2015.s_pi_watch;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
-import com.google.android.gms.R.*;
-import com.google.android.gms.gcm.GcmListenerService;
-import com.google.android.gms.wearable.DataMap;
-import com.google.android.gms.wearable.PutDataMapRequest;
 
-import org.json.JSONArray;
+import com.google.android.gms.gcm.GcmListenerService;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class SpiGcmListenerService extends GcmListenerService {
@@ -55,7 +41,7 @@ public class SpiGcmListenerService extends GcmListenerService {
     private static final String ALERT_MSG = "ALERT_MSG";
     private static final String ACTION_MSG = "ACTION_MSG";
     private static final String[] keys = {ID, TS, SIGNAME, INTERVAL, ALERT_MSG, ACTION_MSG};
-    private static final String GROUP_KEY = "PatientAlert";
+    //private static final String GROUP_KEY = "PatientAlert";
 
     /**
      * Called when message is received.
@@ -194,6 +180,7 @@ public class SpiGcmListenerService extends GcmListenerService {
         //notificationManager.notify(notificationId, notification);
        //NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     }
+    //monitors for changes in the Vertx server ip preference and resends the registration key if it changes.
 
 }
 

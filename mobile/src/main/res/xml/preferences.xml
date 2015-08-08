@@ -5,4 +5,10 @@
         android:title="Display GCM notifications"
         android:summary="Controls whether incoming GCM notifications will be displayed"
         android:defaultValue="true" />
+    <EditTextPreference
+        android:key="@string/pref_ipPref"
+        android:title="@string/pref_ipPref_title"
+        android:summary="@string/pref_ipPref_summary"
+        android:dialogTitle="@string/pref_dialog_title"
+        android:defaultValue="api.s-pi-demo.com"/>
 </PreferenceScreen>
