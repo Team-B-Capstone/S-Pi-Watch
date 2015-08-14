@@ -16,24 +16,34 @@
 
 package edu.pdx.team_b_capstone2015.s_pi_watch;
 
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.net.Uri;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.renderscript.RenderScript;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.gcm.GcmListenerService;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.Wearable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
-
 public class SpiGcmListenerService extends GcmListenerService {
 
     private static final String TAG = "SPIGcmListenerService";
-    private static final String TITLE = "PATIENT_ID";
+
     private static final String ID = "PATIENT_ID";
     private static final String TS = "TS";
     private static final String SIGNAME = "SIGNAME";
@@ -41,6 +51,10 @@ public class SpiGcmListenerService extends GcmListenerService {
     private static final String ALERT_MSG = "ALERT_MSG";
     private static final String ACTION_MSG = "ACTION_MSG";
     private static final String[] keys = {ID, TS, SIGNAME, INTERVAL, ALERT_MSG, ACTION_MSG};
+    public static final String PATH_PATIENT = "/patient";
+    private static final String TITLE = "title";
+    private static final String NAME = "name";
+    private static final String BED = "bed" ;
     //private static final String GROUP_KEY = "PatientAlert";
 
     /**
@@ -54,18 +68,23 @@ public class SpiGcmListenerService extends GcmListenerService {
     @Override
     public void onMessageReceived(String from, Bundle data) {
         //DEBUG
-        String message = data.getString("message");
+/*        GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Wearable.API)
+                .build();
+        mGoogleApiClient.blockingConnect();
+        DataApi.DataItemResult databuffer = Wearable.DataApi.getDataItem(mGoogleApiClient, Uri.parse(PATH_PATIENT + 1)).await();
+                //Log.d(TAG, "Patient1 name : " +);*/
+                String message = data.getString("message");
         Log.d(TAG, "Message: " + message);
         Map<String, String> alert;
         if (data.getString("title").contentEquals("SPI ALERT!")
                 && PreferenceManager.getDefaultSharedPreferences(this).getBoolean("pref_GCMNotifications", false)) {
             alert = parseJSON(data.getString("message"));
-            // set the Title
-            //alert.put(TITLE, "ALERT: ");
+            alert.put(NAME,data.getString(NAME,"John Doe"));
+            alert.put(BED,data.getString(BED,"N/A"));
+            alert.put(TITLE,data.getString(TITLE,"Alert: "));
             sendNotification(alert);
         }
-
-
     }
 
     // [END receive_message]
@@ -117,23 +136,45 @@ public class SpiGcmListenerService extends GcmListenerService {
         Log.d(TAG, "Sending notificaton for ID: " + alert.get(ID));
         Integer notificationId = Integer.valueOf(alert.get(ID));
 
+        // This intent cancels the queries, used when the app is closed
+        Intent launchPatientView = new Intent(this, edu.pdx.team_b_capstone2015.s_pi_watch.MainActivity.class);
+        PendingIntent launchIntent = PendingIntent.getService(this, 0, launchPatientView, PendingIntent.FLAG_CANCEL_CURRENT);
 
+
+
+         Notification secondPageNotification =
+                new NotificationCompat.Builder(this)
+                        .setContentTitle("Alert Message")
+                        .setContentText(alert.get(ALERT_MSG))
+
+                        .build();
+
+         Notification thirdPageNotification =
+                new NotificationCompat.Builder(this)
+                        .setContentTitle("Action Message")
+                        .setContentText(alert.get(ACTION_MSG))
+                        .setColor(Color.RED)
+                        .build();
 
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle("ALERT:")
-                        .setContentText("\nPATIENT ID: " + alert.get(ID) +
-                                "\nTS: " + alert.get(TS) +
-                                "\nSIGNAME: " + alert.get(SIGNAME) +
-                                "\nINTERVAL: " + alert.get(INTERVAL) +
-                                "\nALERT_MSG: " + alert.get(ALERT_MSG) +
-                                "\nACTION_MSG: " + alert.get(ACTION_MSG))
-
-                                //The vibration pattern goes {Start delay, Vibration length, Sleep time, Vibration length}
-                                //This pattern starts instantly, vibrates for 3 seconds, waits 1 second then vibrates for 3 seconds again.
-                        .setVibrate(new long[]{0, 1000, 1000, 1000});
-
+                        .setContentTitle(alert.get(TITLE))
+                        .setContentText(alert.get(NAME) +
+                                "\nPatient ID: " + alert.get(ID) +
+                                "\nBed: " + alert.get(BED) +
+                                "\nAlert Type: " + alert.get(SIGNAME) +
+                                "\nLength: " + alert.get(INTERVAL))
+                        .extend(new NotificationCompat.WearableExtender()
+                                        .addPage(secondPageNotification)
+                                        .addPage(thirdPageNotification)
+                                        .setBackground(BitmapFactory.decodeResource(getResources(), R.drawable.red))
+                                        .setHintScreenTimeout(NotificationCompat.WearableExtender.SCREEN_TIMEOUT_LONG)
+                        )
+                        .setVibrate(new long[]{0, 1000, 1000, 1000})
+                        .setPriority(Notification.PRIORITY_MAX)
+                        .setVisibility(Notification.VISIBILITY_PUBLIC)
+                ;
 
         // Get an instance of the NotificationManager service
         NotificationManagerCompat notificationManager =

@@ -14,19 +14,26 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.CapabilityApi;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.DataItemBuffer;
 import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.MessageApi;
+import com.google.android.gms.wearable.MessageApi.MessageListener;
+import com.google.android.gms.wearable.MessageEvent;
+import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-public class MainActivity extends Activity implements DataApi.DataListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
+public class MainActivity extends Activity implements DataApi.DataListener,
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
     private Context context;
     private GridViewPager pager;
     private TextView mIntroText;
@@ -57,7 +64,9 @@ public class MainActivity extends Activity implements DataApi.DataListener, Goog
     public static final String HEART_RATE = "heart-rate";
     public static final String P_ID= "patient_id";
     public static final String[] keys = {NAME,BED,ID,AGE,TEMP,HEIGHT,BP,STATUS,CASE_ID,H_ID,CARDIAC,ALLERGIES,WEIGHT,HEART_RATE,P_ID};
-    //public static final String[] patients = {"patient0","patient1","patient2","patient3"};
+    private static final String DATA_AVAILABLE = "Data_available";
+    private static final String CAPABILITY_NAME = "Query_S-PI";
+
     //called when the activity is first created. We do the initial set up of the activity here. This would include creating views and binding data to lists.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,18 +78,50 @@ public class MainActivity extends Activity implements DataApi.DataListener, Goog
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
+
+        //listens for a responce from the mobile that the patient data is available
+        Wearable.MessageApi.addListener(mGoogleApiClient, new MessageListener() {
+            @Override
+            public void onMessageReceived(MessageEvent messageEvent){
+                Log.d(TAG, "message recieved: path = " + messageEvent.getPath() + "Message = " + new String(messageEvent.getData()));
+                if(messageEvent.getPath().contentEquals(PATH_QUERY_STATUS)){
+                    if(new String(messageEvent.getData()).contentEquals(DATA_AVAILABLE)){
+                        Log.i(TAG, "Patient data downloaded");
+                        //update the patient info in the main activity
+                        DataItemBuffer databuffer = Wearable.DataApi.getDataItems(mGoogleApiClient).await();
+                        int cnt = databuffer.getCount();
+                        for(int i = 0; i < cnt; i++){
+                            String path = databuffer.get(i).getUri().getPath().toString();
+                            //check path against each patient path
+                            for (int j = 0; j < MAX_PATIENTS; j++) {
+                                String pth = PATH_PATIENT + Integer.toString(j);
+                                if (path.contentEquals(pth)) {
+                                    //put the dataItem in the array location corresponding to the path num.
+                                    Map<String,String> patient = patientData.get(j);
+                                    for(String k : keys){
+                                        patient.put(k, DataMap.fromByteArray(databuffer.get(i).getData()).getString(k));
+                                    }
+                                }
+                            }
+                        }
+                        databuffer.close();
+                        createPagerAdapter();
+                    }
+                }
+            }
+        });
+
         //create a list of maps containing the patient data.
         patientData = new ArrayList<>();
         for(int i = 0; i<MAX_PATIENTS;i++){
             patientData.add(i, new HashMap<String, String>());
         }
 
-            //mGoogleApiClient.
         // Create a notification with an action to toggle if the phone is queryng the Rest API.
         startQueryOperation = new Intent(this, WearableIntentLaunchingService.class);
         //set the action for the intent
         startQueryOperation.setAction(WearableIntentLaunchingService.ACTION_START_REQUEST);
-        //Create a pendingIntent for intent with request code 0 don't generate more then one at a time.
+/*        //Create a pendingIntent for intent with request code 0 don't generate more then one at a time.
         PendingIntent toggleQueryIntent = PendingIntent.getService(this, 0, startQueryOperation,
                 PendingIntent.FLAG_CANCEL_CURRENT);
 
@@ -88,7 +129,7 @@ public class MainActivity extends Activity implements DataApi.DataListener, Goog
         cancelQueryOperation = new Intent(this, WearableIntentLaunchingService.class);
         cancelQueryOperation.setAction(WearableIntentLaunchingService.ACTION_CANCEL_REQUEST);
         PendingIntent cancelQueryIntent = PendingIntent.getService(this, 0, cancelQueryOperation,
-                PendingIntent.FLAG_CANCEL_CURRENT);
+                PendingIntent.FLAG_CANCEL_CURRENT);*/
 
 
         setContentView(R.layout.activity_main);
@@ -103,6 +144,7 @@ public class MainActivity extends Activity implements DataApi.DataListener, Goog
         mGoogleApiClient.connect();
 
     }
+
     //called when the activity is becoming visible to the user. onStart() is followed by onResume()
     @Override
     protected void onStart() {
@@ -114,7 +156,7 @@ public class MainActivity extends Activity implements DataApi.DataListener, Goog
     protected void onPause() {
         super.onPause();
         Wearable.DataApi.removeListener(mGoogleApiClient, this);
-        startService(cancelQueryOperation);
+        //startService(cancelQueryOperation);
         mGoogleApiClient.disconnect();
     }
 
@@ -135,7 +177,8 @@ public class MainActivity extends Activity implements DataApi.DataListener, Goog
     @Override
     protected void onDestroy() {
         //stop the mobile from quering the REST API
-        startService(cancelQueryOperation);
+        //startService(cancelQueryOperation);
+        //Wearable.MessageApi.removeListener();
         super.onDestroy();
 
     }
@@ -145,9 +188,7 @@ public class MainActivity extends Activity implements DataApi.DataListener, Goog
     @Override
     public void onConnected(Bundle connectionHint) {
         mResolvingError = false;
-        Log.d(TAG, "onConnected");
-        //mStartActivityBtn.setEnabled(true);  //Disable a connecting to server layout here
-        Wearable.DataApi.addListener(mGoogleApiClient, this);
+        //Log.d(TAG, "onConnected");
         startService(startQueryOperation);
     }
 
@@ -194,36 +235,10 @@ public class MainActivity extends Activity implements DataApi.DataListener, Goog
                     Log.i(TAG, "query status changed to: " + DataMap.fromByteArray(event.getDataItem().getData())
                             .get(WearableIntentLaunchingService.QUERY_ON));
                     //ignore this type of event.
-
-                }
-                //this is updated when the rest api has return from its initial call
-                // NEED to do this exactly once. should be a message instead...
-                if (event.getDataItem().getUri().getPath().toString().contentEquals(PATH_PATIENTS)) {
-                    Log.i(TAG, "Patient data changed");
-                    //update the patient info in the main activity
-                    DataItemBuffer databuffer = Wearable.DataApi.getDataItems(mGoogleApiClient).await();
-
-                    int cnt = databuffer.getCount();
-                    for(int i = 0; i < cnt; i++){
-                        String path = databuffer.get(i).getUri().getPath().toString();
-                        //check path against each patient path
-                        for (int j = 0; j < MAX_PATIENTS; j++) {
-                            String pth = PATH_PATIENT + Integer.toString(j);
-                            if (path.contentEquals(pth)) {
-                                //put the dataItem in the array location corresponding to the path num.
-                                Map<String,String> patient = patientData.get(j);
-                                for(String k : keys){
-                                    patient.put(k, DataMap.fromByteArray(databuffer.get(i).getData()).getString(k));
-                                }
-                            }
-                        }
-                    }
-                    databuffer.close();
-                    createPagerAdapter();
-                    //pager.getAdapter().notifyDataSetChanged();
+                    return;
                 }
 
-                //check each patient for updates, allows a individual patient to be updated.
+                //check each patient for updates, allows a individual patient to be updated as the data changes.
                 for (int i = 0; i < MAX_PATIENTS; i++) {
                     String path = event.getDataItem().getUri().getPath().toString();
                     if (path.contentEquals(PATH_PATIENT + Integer.toString(i))) {
@@ -251,4 +266,5 @@ public class MainActivity extends Activity implements DataApi.DataListener, Goog
         });
 
     }
+
 }

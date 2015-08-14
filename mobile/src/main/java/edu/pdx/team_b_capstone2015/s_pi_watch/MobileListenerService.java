@@ -9,6 +9,7 @@ import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
 
 import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
@@ -20,6 +21,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MobileListenerService extends WearableListenerService
@@ -48,8 +50,10 @@ public class MobileListenerService extends WearableListenerService
     private static final String HEART_RATE = "heart-rate";
     private static final String P_ID= "patient_id";
     private static final String[] keys = {NAME,BED,ID,AGE,TEMP,HEIGHT,BP,STATUS,CASE_ID,H_ID,CARDIAC,ALLERGIES,WEIGHT,HEART_RATE,P_ID};
+    private static final byte[] DATA_AVAILABLE = "Data_available".getBytes() ;
+    private static final String GET_PATIENTS = "Get_Patients";
     private GoogleApiClient mGoogleApiClient;
-    private static final String TAG = "SPIMobileService";
+    private static final String TAG = "SPI-MobileService";
 
     @Override
     public void onCreate() {
@@ -72,6 +76,23 @@ public class MobileListenerService extends WearableListenerService
     }
 
     @Override
+    public void onMessageReceived(MessageEvent messageEvent) {
+        super.onMessageReceived(messageEvent);
+        Log.d(TAG, "message recieved: path = " + messageEvent.getPath() + " Message = " + new String(messageEvent.getData()));
+        if(messageEvent.getPath().contentEquals(PATH_QUERY_STATUS)){
+            if(new String(messageEvent.getData()).contentEquals(GET_PATIENTS)){
+                String json = getPatients();
+                if(json != null){
+                    updateData(json);
+                }
+            }
+        }
+        //send a responce so the wearable knows the data is available
+        Wearable.MessageApi.sendMessage(mGoogleApiClient, messageEvent.getSourceNodeId(), PATH_QUERY_STATUS, DATA_AVAILABLE);
+    }
+
+ /*   Not Currently used, data turned out to be mostly static so regularly querying the server was not needed
+  @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "onDataChanged: " + dataEvents + " for " + getPackageName());
@@ -89,10 +110,6 @@ public class MobileListenerService extends WearableListenerService
                     Boolean queryServer = DataMap.fromByteArray(event.getDataItem().getData()).get(FIELD_QUERY_ON);
                     if (queryServer) {
                         Log.d(TAG, "start querying server");
-                        String json = getPatients();
-                        if(json != null){
-                            updateData(event,json);
-                        }
                         // and set up system to regularly query the other data
                         // this needs to be in another service.
                     } else {
@@ -105,7 +122,7 @@ public class MobileListenerService extends WearableListenerService
                 }
             }
         }
-    }
+    }*/
     //queries the http REST api for patient info
     //retuns a json string with all patient info
     private String getPatients() {
@@ -124,7 +141,7 @@ public class MobileListenerService extends WearableListenerService
             return null;
         }
         result = convertStreamToString(in);
-        Log.d(TAG, "server returned from patients call " + result);
+        //Log.d(TAG, "server returned from patients call " + result);
         return result;
     }
     //converts a stream to a string
@@ -134,7 +151,7 @@ public class MobileListenerService extends WearableListenerService
     }
     //updates the shared dataitems
     //takes a json string
-    private void updateData(DataEvent e, String result){
+    private void updateData(String result){
         if (mGoogleApiClient.isConnected()) {
             Log.d(TAG, "Already connected");
         } else if (!mGoogleApiClient.isConnecting()) {
@@ -143,9 +160,7 @@ public class MobileListenerService extends WearableListenerService
         }
 
         PutDataMapRequest put = PutDataMapRequest.create(PATH_PATIENTS);
-        //put.getDataMap().putString("json", result);//json string of all patient data
-        //need to change to a message event.
-        put.getDataMap().putString("event", this.toString());//forces update of patients
+
         DataApi.DataItemResult status =
                 Wearable.DataApi.putDataItem(mGoogleApiClient, put.asPutDataRequest()).await();
         Log.d(TAG, "Put results: " + status.getStatus().toString());
@@ -155,6 +170,7 @@ public class MobileListenerService extends WearableListenerService
             Log.d(TAG, "Puting " + p.getUri().getPath());
             Wearable.DataApi.putDataItem(mGoogleApiClient, p.asPutDataRequest()).await();
         }
+
 
     }
 

@@ -64,7 +64,6 @@ public class PatientViewAdapter extends FragmentGridPagerAdapter {
         }
 
         mRows.add(new Row(cardFragment(R.string.dismiss_title, R.string.dismiss_text)));
-
         mDefaultBg = new ColorDrawable(R.color.dark_grey);
         mClearBg = new ColorDrawable(android.R.color.transparent);
     }
