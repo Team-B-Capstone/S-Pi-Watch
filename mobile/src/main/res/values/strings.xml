@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">S-Pi-Watch</string>
     <string name="action_settings">Settings</string>
+    <string name="enable_alerts">Disable GCM Alerts</string>
+    <string name="disable_alerts">Enable GCM Alerts</string>
+    <string name="GCM_notifications">pref_GCMNotifications</string>
+    <string name="pref_ipPref">pref_ipPref</string>
+    <string name="pref_ipPref_title">IP address of GCM registation server</string>
+    <string name="pref_ipPref_summary">Sets the ip address of the server that sends the patient alert notifications.</string>
+    <string name="pref_dialog_title">IP address of vertx server</string>
 </resources>
