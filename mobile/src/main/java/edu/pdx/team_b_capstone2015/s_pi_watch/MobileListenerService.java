@@ -1,6 +1,7 @@
 package edu.pdx.team_b_capstone2015.s_pi_watch;
 
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -27,7 +28,7 @@ import java.util.List;
 public class MobileListenerService extends WearableListenerService
         implements GoogleApiClient.ConnectionCallbacks {
 
-    public final static String apiURL = "http://api.s-pi-demo.com/patients";
+    //public final static String apiURL = "http://api.s-pi-demo.com/patients";
     public static final String FIELD_QUERY_ON = "query_on";
     public static final String PATH_PATIENTS = "/patients";
     public static final String PATH_PATIENT = "/patient";
@@ -87,7 +88,7 @@ public class MobileListenerService extends WearableListenerService
                 }
             }
         }
-        //send a responce so the wearable knows the data is available
+        //send a response so the wearable knows the data is available
         Wearable.MessageApi.sendMessage(mGoogleApiClient, messageEvent.getSourceNodeId(), PATH_QUERY_STATUS, DATA_AVAILABLE);
     }
 
@@ -127,7 +128,9 @@ public class MobileListenerService extends WearableListenerService
     //retuns a json string with all patient info
     private String getPatients() {
         Log.d(TAG, "getting patient names");
-        String urlString=apiURL;
+        String urlString = "http://"
+                + PreferenceManager.getDefaultSharedPreferences(this).getString("pref_ipPref","api.s-pi-demo.com")
+                +"/patients";
         String result;
         InputStream in;
         // HTTP Get
