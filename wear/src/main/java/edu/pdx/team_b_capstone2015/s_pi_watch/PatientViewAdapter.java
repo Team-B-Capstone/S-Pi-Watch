@@ -1,3 +1,20 @@
+/**
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package edu.pdx.team_b_capstone2015.s_pi_watch;
 
 import android.app.Fragment;
@@ -23,11 +40,6 @@ import java.util.Map;
 import static edu.pdx.team_b_capstone2015.s_pi_watch.MainActivity.*;
 
 public class PatientViewAdapter extends FragmentGridPagerAdapter {
-    //final Context mContext;
-
-    //public PatientViewAdapter(final Context context, FragmentManager fm) {
-    //    mContext = context.getApplicationContext();
-    //}
 
     private static final int TRANSITION_DURATION_MILLIS = 100;
 
@@ -54,18 +66,20 @@ public class PatientViewAdapter extends FragmentGridPagerAdapter {
                         cardFragment("Patient Vitals", "Heart Rate: "+p.get(HEART_RATE)
                                         +"\nBlood Pressure: "+p.get(BP)
                                         +"\nTemp: "+p.get(TEMP)),
-                        cardFragment("Alerts", "TO BE IMPLEMENTED LATER"),//need integration with alert notifications
+                        //cardFragment("Alerts", "TO BE IMPLEMENTED LATER"),//need integration with alert notifications
                         cardFragment("Clinical Data", "Height: "+p.get(HEIGHT)
                                         +"\nWeight: "+p.get(WEIGHT)
-                                        +"\nAllergies: "+p.get(ALLERGIES)),
-                        new CustomFragment(),
-                        new CustomFragment2()));
+                                        +"\nAllergies: "+p.get(ALLERGIES))
+                        //add additional fragments to extend
+                        //,new CustomFragment()
+                        //,new CustomFragment2()
+                        ));
             }
         }
 
         mRows.add(new Row(cardFragment(R.string.dismiss_title, R.string.dismiss_text)));
-        mDefaultBg = new ColorDrawable(R.color.dark_grey);
-        mClearBg = new ColorDrawable(android.R.color.transparent);
+        mDefaultBg = new ColorDrawable(mContext.getResources().getColor(R.color.dark_grey));
+        mClearBg = new ColorDrawable(mContext.getResources().getColor(android.R.color.transparent));
     }
 
 
@@ -105,7 +119,9 @@ public class PatientViewAdapter extends FragmentGridPagerAdapter {
 
     @Override
     public Drawable getBackgroundForPage(final int row, final int column) {
+        //Special backgrounds for specific pages is currently not implemented
         return mPageBackgrounds.get(new Point(column, row));
+
     }
 
     @Override
@@ -142,8 +158,7 @@ public class PatientViewAdapter extends FragmentGridPagerAdapter {
         CardFragment fragment =
                 CardFragment.create(title, text);
         // Add some extra bottom margin to leave room for the page indicator
-        fragment.setCardMarginBottom(
-                res.getDimensionPixelSize(R.dimen.card_margin_bottom));
+        fragment.setCardMarginBottom(res.getDimensionPixelSize(R.dimen.card_margin_bottom));
         return fragment;
     }
     //version of CardFragment with dynamic text, and no title
@@ -152,8 +167,7 @@ public class PatientViewAdapter extends FragmentGridPagerAdapter {
         CardFragment fragment =
                 CardFragment.create("",text);
         // Add some extra bottom margin to leave room for the page indicator
-        fragment.setCardMarginBottom(
-                res.getDimensionPixelSize(R.dimen.card_margin_bottom));
+        fragment.setCardMarginBottom(res.getDimensionPixelSize(R.dimen.card_margin_bottom));
         return fragment;
     }
     //
@@ -200,26 +214,26 @@ public class PatientViewAdapter extends FragmentGridPagerAdapter {
             return mDefaultBg;
         }
     };
-    // Background for specific row/column
+    // Code below allows for a different Background for specific row/column
     LruCache<Point, Drawable> mPageBackgrounds = new LruCache<Point, Drawable>(3) {
         @Override
         protected Drawable create(final Point page) {
-            // place bugdroid as the background at row 3, column 2
-            if (page.y == 3 && page.x == 2) {
-                int resid = R.drawable.red;
-                new DrawableLoadingTask(mContext) {
-                    @Override
-                    protected void onPostExecute(Drawable result) {
-                        TransitionDrawable background = new TransitionDrawable(new Drawable[] {
-                                mClearBg,
-                                result
-                        });
-                        mPageBackgrounds.put(page, background);
-                        notifyPageBackgroundChanged(page.y, page.x);
-                        background.startTransition(TRANSITION_DURATION_MILLIS);
-                    }
-                }.execute(resid);
-            }
+            // place a red background at row 3, column 2
+//            if (page.y == 3 && page.x == 2) {
+//                int resid = R.drawable.red;
+//                new DrawableLoadingTask(mContext) {
+//                    @Override
+//                    protected void onPostExecute(Drawable result) {
+//                        TransitionDrawable background = new TransitionDrawable(new Drawable[] {
+//                                mClearBg,
+//                                result
+//                        });
+//                        mPageBackgrounds.put(page, background);
+//                        notifyPageBackgroundChanged(page.y, page.x);
+//                        background.startTransition(TRANSITION_DURATION_MILLIS);
+//                    }
+//                }.execute(resid);
+//            }
             return GridPagerAdapter.BACKGROUND_NONE;
         }
     };
