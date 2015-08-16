@@ -27,6 +27,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.wearable.view.GridViewPager;
 import android.util.LruCache;
 import android.support.wearable.view.CardFragment;
 import android.support.wearable.view.FragmentGridPagerAdapter;
@@ -46,15 +47,20 @@ public class PatientViewAdapter extends FragmentGridPagerAdapter {
     private final Context mContext;
     private List<Row> mRows;
     private ColorDrawable mDefaultBg;
-
-    private ColorDrawable mClearBg;
+    //private ColorDrawable mClearBg;
 
     public PatientViewAdapter(Context ctx, FragmentManager fm) {
         super(fm);
         mContext = ctx;
-
         //list of rows for this adapter
-        mRows = new ArrayList<PatientViewAdapter.Row>();
+        buildRows();
+        mDefaultBg = new ColorDrawable(mContext.getResources().getColor(R.color.dark_grey));
+       // mClearBg = new ColorDrawable(mContext.getResources().getColor(android.R.color.transparent));
+
+    }
+
+    private void buildRows() {
+        mRows = new ArrayList<Row>();
         for(int i = 0; i < MAX_PATIENTS ; i++){
             if(patientData.get(i)!= null){
                 Map<String,String> p = patientData.get(i);
@@ -76,10 +82,7 @@ public class PatientViewAdapter extends FragmentGridPagerAdapter {
                         ));
             }
         }
-
         mRows.add(new Row(cardFragment(R.string.dismiss_title, R.string.dismiss_text)));
-        mDefaultBg = new ColorDrawable(mContext.getResources().getColor(R.color.dark_grey));
-        mClearBg = new ColorDrawable(mContext.getResources().getColor(android.R.color.transparent));
     }
 
 

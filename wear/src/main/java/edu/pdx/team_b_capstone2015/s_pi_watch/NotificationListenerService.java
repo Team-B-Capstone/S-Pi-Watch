@@ -1,6 +1,8 @@
 package edu.pdx.team_b_capstone2015.s_pi_watch;
 
 import android.app.Notification;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -62,13 +64,13 @@ public class NotificationListenerService extends WearableListenerService
     public void onMessageReceived(MessageEvent messageEvent) {
         super.onMessageReceived(messageEvent);
         if(messageEvent.getPath().contentEquals(PATH_NOTIFICATION)){
-            DataMap data = DataMap.fromByteArray( messageEvent.getData());
+            DataMap data = DataMap.fromByteArray(messageEvent.getData());
             sendNotification(data);
 
             //save the data for use in patient view
-            PutDataMapRequest put = PutDataMapRequest.create(PATH_NOTIFICATION+data.getString(ID));
+            PutDataMapRequest put = PutDataMapRequest.create(PATH_NOTIFICATION + data.getString(ID));
             for(String s: data.keySet()){
-                put.getDataMap().putString(s,data.getString(s));
+                put.getDataMap().putString(s, data.getString(s));
             }
             Wearable.DataApi.putDataItem(mGoogleApiClient, put.asPutDataRequest()).await();
         }
@@ -85,6 +87,15 @@ public class NotificationListenerService extends WearableListenerService
 
     }
     private void sendNotification(DataMap alert) {
+
+        // Create a pending intent that starts this wearable app
+        Intent startIntent = new Intent(this, MainActivity.class).setAction(Intent.ACTION_MAIN);
+        // Add extra data for app startup
+        startIntent.putExtra("id",alert.getString(ID));
+        PendingIntent startPendingIntent =
+                PendingIntent.getActivity(this, 0, startIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+
         Log.d(TAG, "Sending notificaton for ID: " + alert.getString(ID));
         Integer notificationId = Integer.valueOf(alert.getString(ID));
 
@@ -119,11 +130,12 @@ public class NotificationListenerService extends WearableListenerService
                                         .addPage(thirdPageNotification)
                                         .setBackground(BitmapFactory.decodeResource(getResources(), R.drawable.red))
                                         .setHintScreenTimeout(NotificationCompat.WearableExtender.SCREEN_TIMEOUT_LONG)
+
                         )
                         .setVibrate(new long[]{0, 1000, 1000, 1000})
                         .setPriority(Notification.PRIORITY_MAX)
                         .setVisibility(Notification.VISIBILITY_PUBLIC)
-                ;
+                        .setContentIntent(startPendingIntent);
 
         // Get an instance of the NotificationManager service
         NotificationManagerCompat notificationManager =

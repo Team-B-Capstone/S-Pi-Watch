@@ -1,36 +1,31 @@
 package edu.pdx.team_b_capstone2015.s_pi_watch;
-import android.app.PendingIntent;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.os.Bundle;
 import android.support.wearable.view.DotsPageIndicator;
 import android.support.wearable.view.GridViewPager;
 
-import android.app.Activity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.wearable.CapabilityApi;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.DataItemBuffer;
 import com.google.android.gms.wearable.DataMap;
-import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageApi.MessageListener;
 import com.google.android.gms.wearable.MessageEvent;
-import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class MainActivity extends Activity implements DataApi.DataListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
@@ -38,10 +33,8 @@ public class MainActivity extends Activity implements DataApi.DataListener,
     private GridViewPager pager;
     private TextView mIntroText;
     Intent startQueryOperation;
-    Intent cancelQueryOperation;
     private static final int REQUEST_RESOLVE_ERROR = 1000;
     public static final String PATH_QUERY_STATUS = "/query_status";
-    public static final String PATH_PATIENTS = "/patients";
     public static final String PATH_PATIENT = "/patient";
     public static final int MAX_PATIENTS = 4 ;
     private static final String TAG = "SPI-MainActivity";
@@ -65,25 +58,24 @@ public class MainActivity extends Activity implements DataApi.DataListener,
     public static final String P_ID= "patient_id";
     public static final String[] keys = {NAME,BED,ID,AGE,TEMP,HEIGHT,BP,STATUS,CASE_ID,H_ID,CARDIAC,ALLERGIES,WEIGHT,HEART_RATE,P_ID};
     private static final String DATA_AVAILABLE = "Data_available";
-    private static final String CAPABILITY_NAME = "Query_S-PI";
 
     //called when the activity is first created. We do the initial set up of the activity here. This would include creating views and binding data to lists.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = this;
+
         //google api client for message passing to mobile
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
-
         //listens for a responce from the mobile that the patient data is available
         Wearable.MessageApi.addListener(mGoogleApiClient, new MessageListener() {
             @Override
             public void onMessageReceived(MessageEvent messageEvent){
-                Log.d(TAG, "message recieved: path = " + messageEvent.getPath() + "Message = " + new String(messageEvent.getData()));
+                //Log.d(TAG, "message recieved: path = " + messageEvent.getPath() + "Message = " + new String(messageEvent.getData()));
                 if(messageEvent.getPath().contentEquals(PATH_QUERY_STATUS)){
                     if(new String(messageEvent.getData()).contentEquals(DATA_AVAILABLE)){
                         Log.i(TAG, "Patient data downloaded");
@@ -134,21 +126,21 @@ public class MainActivity extends Activity implements DataApi.DataListener,
 
         setContentView(R.layout.activity_main);
         mIntroText = (TextView) findViewById(R.id.intro);
-        //final Resources res = getResources();
-        pager = (GridViewPager) findViewById(R.id.pager);
 
+        pager = (GridViewPager) findViewById(R.id.pager);
         //sets the adapter for the pager
         //pager.setAdapter(new PatientViewAdapter(this, getFragmentManager()));
         DotsPageIndicator dotsPageIndicator = (DotsPageIndicator) findViewById(R.id.page_indicator);
         dotsPageIndicator.setPager(pager);
         mGoogleApiClient.connect();
-
     }
 
     //called when the activity is becoming visible to the user. onStart() is followed by onResume()
     @Override
     protected void onStart() {
+
         super.onStart();
+
     }
 
     //method is always called when the activity is being placed in the background or is about to be destroyed. This is where we can save our persistent data
@@ -258,8 +250,26 @@ public class MainActivity extends Activity implements DataApi.DataListener,
         runOnUiThread(new Runnable(){
             @Override
             public void run() {
-                pager.setAdapter(new PatientViewAdapter(context, getFragmentManager()));
+
                 //pager.getAdapter().notifyDataSetChanged();
+                //check to see if the activity was opened by a notification and set to correct row if  it was
+                Intent intent = getIntent();
+                final String patientId = intent.getStringExtra(ID);
+                if(patientId != null){
+                    //add a listener so that as soon as the layout is created we can change the row.
+                    pager.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                        @Override
+                        public void onLayoutChange(View v, int left, int top, int right,
+                                                   int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                            //remove this listener as it should only be used once
+                            pager.removeOnLayoutChangeListener(this);
+                            pager.setCurrentItem(Integer.parseInt(patientId), 0, false);
+                            pager.getAdapter().notifyDataSetChanged();
+
+                        }
+                    });
+                }
+                pager.setAdapter(new PatientViewAdapter(context, getFragmentManager()));
                 pager.setVisibility(View.VISIBLE);
                 mIntroText.setVisibility(View.INVISIBLE);
             }
