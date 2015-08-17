@@ -17,11 +17,8 @@
 package edu.pdx.team_b_capstone2015.s_pi_watch;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.google.android.gms.iid.InstanceID;
 import com.google.android.gms.iid.InstanceIDListenerService;
 
 public class SpiInstanceIDListenerService extends InstanceIDListenerService {
@@ -42,13 +39,13 @@ public class SpiInstanceIDListenerService extends InstanceIDListenerService {
 
         Log.i(TAG, "GCM: Updating ID");
 
-        Intent intent = new Intent(this, SpiRegistrationIntentService.class);
+        Intent intent = new Intent(this, SpiMobileIntentService.class);
         intent.setAction("UNREGISTER");
         startService(intent);
 
 
         //register new id
-        intent = new Intent(this, SpiRegistrationIntentService.class);
+        intent = new Intent(this, SpiMobileIntentService.class);
         intent.setAction("REGISTER");
         startService(intent);
     }

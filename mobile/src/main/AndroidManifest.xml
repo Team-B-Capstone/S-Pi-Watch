@@ -64,7 +64,7 @@
             </intent-filter>
         </service>
         <service android:enabled="true"
-            android:name="edu.pdx.team_b_capstone2015.s_pi_watch.SpiRegistrationIntentService">
+            android:name=".SpiMobileIntentService">
         </service>
     </application>
 

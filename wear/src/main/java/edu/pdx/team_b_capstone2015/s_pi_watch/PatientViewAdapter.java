@@ -61,26 +61,35 @@ public class PatientViewAdapter extends FragmentGridPagerAdapter {
 
     private void buildRows() {
         mRows = new ArrayList<Row>();
-        for(int i = 0; i < MAX_PATIENTS ; i++){
-            if(patientData.get(i)!= null){
-                Map<String,String> p = patientData.get(i);
 
-                mRows.add(new Row(
-                        cardFragment(p.get(NAME),"Patient ID: "+p.get(P_ID)
-                                        +"\nBed: "+p.get(BED)
-                                        +"\nStatus: "+p.get(STATUS)),
-                        cardFragment("Patient Vitals", "Heart Rate: "+p.get(HEART_RATE)
-                                        +"\nBlood Pressure: "+p.get(BP)
-                                        +"\nTemp: "+p.get(TEMP)),
-                        //cardFragment("Alerts", "TO BE IMPLEMENTED LATER"),//need integration with alert notifications
-                        cardFragment("Clinical Data", "Height: "+p.get(HEIGHT)
-                                        +"\nWeight: "+p.get(WEIGHT)
-                                        +"\nAllergies: "+p.get(ALLERGIES))
-                        //add additional fragments to extend
-                        //,new CustomFragment()
-                        //,new CustomFragment2()
-                        ));
+        for(int i = 0; i < MAX_PATIENTS ; i++){
+            Map<String,String> p = patientData.get(i);
+            Row row = new Row();
+            if(patientData.get(i)!= null){
+                row.add(cardFragment(p.get(NAME),"Patient ID: "+p.get(P_ID)
+                        +"\nBed: "+p.get(BED)
+                        +"\nStatus: "+p.get(STATUS)));
+                row.add(cardFragment("Patient Vitals", "Heart Rate: " + p.get(HEART_RATE)
+                        + "\nBlood Pressure: " + p.get(BP)
+                        + "\nTemp: " + p.get(TEMP)));
+
+                row.add(cardFragment("Clinical Data", "Height: "+p.get(HEIGHT)
+                        +"\nWeight: "+p.get(WEIGHT)
+                        +"\nAllergies: "+p.get(ALLERGIES)));
+                //add additional fragments to extend
+                //,new CustomFragment()
+                //,new CustomFragment2(
+
+                //Add alert column if available
+                if(p.get(SIGNAME) != null) {
+                    row.add(cardFragment("Last Alert", "Type: " + p.get(SIGNAME)
+                            + "\nLength: " + p.get(INTERVAL)
+                            + "\nMessage:\n" + p.get(ALERT_MSG)
+                            + "\nAction:\n"+ p.get(ACTION_MSG)));
+                }
             }
+
+            mRows.add(row);
         }
         mRows.add(new Row(cardFragment(R.string.dismiss_title, R.string.dismiss_text)));
     }

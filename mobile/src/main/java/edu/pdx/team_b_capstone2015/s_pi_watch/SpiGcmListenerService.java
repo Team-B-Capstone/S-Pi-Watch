@@ -63,7 +63,6 @@ public class SpiGcmListenerService extends GcmListenerService {
             alert.put(NAME,data.getString(NAME,"John Doe"));
             alert.put(BED,data.getString(BED,"N/A"));
             alert.put(TITLE, data.getString(TITLE, "Alert!"));
-            //sendNotification(alert);
             Intent send = new Intent(this, SpiMobileIntentService.class).setAction("SEND_NOTIFICATION");
             for(String s: alert.keySet()){
                 send.putExtra(s,alert.get(s));

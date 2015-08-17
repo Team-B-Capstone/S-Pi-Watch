@@ -59,17 +59,14 @@ public class MobileListenerService extends WearableListenerService
     @Override
     public void onCreate() {
         super.onCreate();
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Wearable.API)
-                .addConnectionCallbacks(this)
-                .build();
-        Log.d(TAG, "onCreate");
+
+        //Log.d(TAG, "onCreate");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onDestroy");
+        //Log.d(TAG, "onDestroy");
         if (mGoogleApiClient.isConnected() || mGoogleApiClient.isConnecting()) {
             mGoogleApiClient.disconnect();
         }
@@ -84,65 +81,51 @@ public class MobileListenerService extends WearableListenerService
             if(new String(messageEvent.getData()).contentEquals(GET_PATIENTS)){
                 String json = getPatients();
                 if(json != null){
+                    mGoogleApiClient = new GoogleApiClient.Builder(this)
+                            .addApi(Wearable.API)
+                            .addConnectionCallbacks(this)
+                            .build();
+                    mGoogleApiClient.blockingConnect();
                     updateData(json);
+                    //send a response so the wearable knows the data is available
+                    Wearable.MessageApi.sendMessage(mGoogleApiClient, messageEvent.getSourceNodeId(), PATH_QUERY_STATUS, DATA_AVAILABLE);
+                    mGoogleApiClient.disconnect();
                 }
             }
         }
-        //send a response so the wearable knows the data is available
-        Wearable.MessageApi.sendMessage(mGoogleApiClient, messageEvent.getSourceNodeId(), PATH_QUERY_STATUS, DATA_AVAILABLE);
+
     }
 
- /*   Not Currently used, data turned out to be mostly static so regularly querying the server was not needed
-  @Override
-    public void onDataChanged(DataEventBuffer dataEvents) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "onDataChanged: " + dataEvents + " for " + getPackageName());
-        }
-        for (DataEvent event : dataEvents) {
-            Log.d(TAG, "URI path: " + event.getDataItem().getUri().getPath());
-
-            if (event.getType() == DataEvent.TYPE_DELETED) {
-                Log.i(TAG, event + " deleted");
-            } else if (event.getType() == DataEvent.TYPE_CHANGED) {//Indicates that the enclosing DataEvent was triggered by a data item being added or changed.
-                //get a data item from the data map
-
-                if(event.getDataItem().getUri().getPath().contentEquals(PATH_QUERY_STATUS)){
-                    Log.i(TAG,"query status changed");
-                    Boolean queryServer = DataMap.fromByteArray(event.getDataItem().getData()).get(FIELD_QUERY_ON);
-                    if (queryServer) {
-                        Log.d(TAG, "start querying server");
-                        // and set up system to regularly query the other data
-                        // this needs to be in another service.
-                    } else {
-                        Log.d(TAG, "stop querying server");
-                        // stop querying the server for updates.
-                    }
-                }
-                if(event.getDataItem().getUri().getPath().contentEquals(PATH_PATIENTS)){
-                    Log.i(TAG, "Patient data changed");
-                }
-            }
-        }
-    }*/
     //queries the http REST api for patient info
     //retuns a json string with all patient info
     private String getPatients() {
-        Log.d(TAG, "getting patient names");
-        String urlString = "http://"
-                + PreferenceManager.getDefaultSharedPreferences(this).getString("pref_ipPref","api.s-pi-demo.com")
-                +"/patients";
+
+        String server = "http://"
+                + PreferenceManager.getDefaultSharedPreferences(this).getString("pref_ipPref","api.s-pi-demo.com");
+        String path = "/patients";
         String result;
         InputStream in;
         // HTTP Get
         try {
-            URL url = new URL(urlString);
+            Log.d(TAG, "getting patient names from "+ server + path);
+            URL url = new URL(server+path);
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             in = urlConnection.getInputStream();
 
         } catch (Exception ex ) {
-            Log.e(TAG, "Error during HTTP connection");
-            return null;
+            try{
+                URL url = new URL(server+":8080"+path);
+                Log.d(TAG, "getting patient names from "+ url.toString());
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                in = urlConnection.getInputStream();
+
+            }catch(Exception e){
+                Log.e(TAG, "Error during HTTP connection");
+                return null;
+            }
+
         }
+
         result = convertStreamToString(in);
         //Log.d(TAG, "server returned from patients call " + result);
         return result;
@@ -155,12 +138,7 @@ public class MobileListenerService extends WearableListenerService
     //updates the shared dataitems
     //takes a json string
     private void updateData(String result){
-        if (mGoogleApiClient.isConnected()) {
-            Log.d(TAG, "Already connected");
-        } else if (!mGoogleApiClient.isConnecting()) {
-            mGoogleApiClient.blockingConnect();
-            Log.d(TAG, "connected via blockingConnect");
-        }
+
 
         PutDataMapRequest put = PutDataMapRequest.create(PATH_PATIENTS);
 
@@ -173,6 +151,7 @@ public class MobileListenerService extends WearableListenerService
             Log.d(TAG, "Puting " + p.getUri().getPath());
             Wearable.DataApi.putDataItem(mGoogleApiClient, p.asPutDataRequest()).await();
         }
+
 
 
     }

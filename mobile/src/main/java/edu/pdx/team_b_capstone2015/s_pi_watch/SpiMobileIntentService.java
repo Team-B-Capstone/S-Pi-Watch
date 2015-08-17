@@ -70,8 +70,10 @@ public class SpiMobileIntentService extends IntentService implements GoogleApiCl
 
     @Override
     public void onDestroy() {
-
         super.onDestroy();
+        if(mGoogleApiClient.isConnected()){
+            mGoogleApiClient.disconnect();
+        }
     }
 
     @Override

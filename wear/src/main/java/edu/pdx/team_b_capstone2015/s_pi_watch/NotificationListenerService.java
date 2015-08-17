@@ -26,7 +26,6 @@ public class NotificationListenerService extends WearableListenerService
 
     private static final String TAG = "SPI-NotificationListSrv";
     private static final String PATH_NOTIFICATION = "/Notification";
-    private GoogleApiClient mGoogleApiClient;
     private static final String ID = "PATIENT_ID";
     private static final String TS = "TS";
     private static final String SIGNAME = "SIGNAME";
@@ -36,26 +35,19 @@ public class NotificationListenerService extends WearableListenerService
     private static final String TITLE = "title";
     private static final String NAME = "name";
     private static final String BED = "bed" ;
+    public static final String[] notificationKeys = {SIGNAME,INTERVAL,ALERT_MSG,ACTION_MSG,TS};
     public NotificationListenerService() {
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Wearable.API)
-                .addConnectionCallbacks(this)
-                .build();
-        //Log.d(TAG, "onCreate");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        //Log.d(TAG, "onDestroy");
-        if (mGoogleApiClient.isConnected() || mGoogleApiClient.isConnecting()) {
-            mGoogleApiClient.disconnect();
-        }
+
 
 
     }
@@ -66,20 +58,12 @@ public class NotificationListenerService extends WearableListenerService
         if(messageEvent.getPath().contentEquals(PATH_NOTIFICATION)){
             DataMap data = DataMap.fromByteArray(messageEvent.getData());
             sendNotification(data);
-
-            //save the data for use in patient view
-            PutDataMapRequest put = PutDataMapRequest.create(PATH_NOTIFICATION + data.getString(ID));
-            for(String s: data.keySet()){
-                put.getDataMap().putString(s, data.getString(s));
-            }
-            Wearable.DataApi.putDataItem(mGoogleApiClient, put.asPutDataRequest()).await();
         }
-
     }
 
     @Override
     public void onConnected(Bundle bundle) {
-
+        Log.d(TAG, "connected");
     }
 
     @Override

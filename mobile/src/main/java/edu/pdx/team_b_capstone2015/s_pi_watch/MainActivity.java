@@ -3,24 +3,12 @@ package edu.pdx.team_b_capstone2015.s_pi_watch;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-
-import org.java_websocket.WebSocket;
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.handshake.ServerHandshake;
-
-import java.net.URI;
-import java.net.URISyntaxException;
 
 
 
@@ -134,7 +122,7 @@ public class MainActivity extends Activity {
         if (checkPlayServices()) {
             Log.i(TAG, "GCM: Initiating Intent: Registering with GCM");
             // Start IntentService to register this application with GCM.
-            Intent GCMRegistration = new Intent(MainActivity.this, SpiRegistrationIntentService.class);
+            Intent GCMRegistration = new Intent(MainActivity.this, SpiMobileIntentService.class);
             GCMRegistration.setAction("REGISTER");
             startService(GCMRegistration);
         }
@@ -145,7 +133,7 @@ public class MainActivity extends Activity {
         if (checkPlayServices()) {
             Log.i(TAG, "GCM: Initiating Intent: unregistering with GCM");
             // Start IntentService to register this application with GCM.
-            Intent GCMRegistration = new Intent(MainActivity.this, SpiRegistrationIntentService.class);
+            Intent GCMRegistration = new Intent(MainActivity.this, SpiMobileIntentService.class);
             GCMRegistration.setAction("UNREGISTER");
             startService(GCMRegistration);
         }
