@@ -57,11 +57,12 @@ public class SpiGcmListenerService extends GcmListenerService {
 
         Log.d(TAG, "Message: " + data.getString("message"));
         Map<String, String> alert;
-        if (data.getString("title").contentEquals("SPI ALERT!")
+        String title = data.getString(TITLE);
+        if ((title != null) && title.contentEquals("SPI ALERT!")
                 && PreferenceManager.getDefaultSharedPreferences(this).getBoolean("pref_GCMNotifications", false)) {
             alert = parseJSON(data.getString("message"));
-            alert.put(NAME,data.getString(NAME,"John Doe"));
-            alert.put(BED,data.getString(BED,"N/A"));
+            alert.put(NAME, data.getString(NAME, "Unknown"));
+            alert.put(BED, data.getString(BED,"N/A"));
             alert.put(TITLE, data.getString(TITLE, "Alert!"));
             Intent send = new Intent(this, SpiMobileIntentService.class).setAction("SEND_NOTIFICATION");
             for(String s: alert.keySet()){

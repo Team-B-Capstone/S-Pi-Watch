@@ -49,7 +49,7 @@ public class SpiMobileIntentService extends IntentService implements GoogleApiCl
         GoogleApiClient.OnConnectionFailedListener {
     private static String registrationToken;
     private String host;
-    int PORT = 9996;
+    private final int PORT = 9996;
     private static final String TAG = "SPI-RegIntentService";
     private static final String PATH_NOTIFICATION = "/Notification";
     private GoogleApiClient mGoogleApiClient;
@@ -121,7 +121,7 @@ public class SpiMobileIntentService extends IntentService implements GoogleApiCl
             mGoogleApiClient.blockingConnect();
             DataMap data = new DataMap();
             data.putAll(DataMap.fromBundle(intent.getExtras()));
-            sendNotification(PATH_NOTIFICATION, data);
+            sendNotification( data);
         }
     }
     /**
@@ -175,7 +175,7 @@ public class SpiMobileIntentService extends IntentService implements GoogleApiCl
     }
 
     //sends a notification message to the wearable
-    private void sendNotification( String path,DataMap dataMap) {
+    private void sendNotification(DataMap dataMap) {
 
         if (mGoogleApiClient.isConnected()) {
             Wearable.MessageApi.sendMessage(mGoogleApiClient,

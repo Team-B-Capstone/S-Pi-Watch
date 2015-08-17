@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -15,8 +16,6 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 public class MainActivity extends Activity {
     private static final String TAG = "SPI-MAIN";
     private static boolean registered = false;
-    // Google Cloud Messaging helper objects:
-    //private BroadcastReceiver mRegistrationBroadcastReceiver;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     //private WebSocketClient mWebSocketClient;
     //private static final String WEBSOCKET_HOST = "ws://10.0.07:8080";
@@ -97,17 +96,16 @@ public class MainActivity extends Activity {
 
     //saved the app state when rotating, prevents multiple registrations.
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean("registered",registered);
     }
 
     @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        if(savedInstanceState != null){
-            registered = savedInstanceState.getBoolean("registered");
-        }
+        registered = savedInstanceState.getBoolean("registered");
+
     }
 
     @Override
@@ -127,9 +125,8 @@ public class MainActivity extends Activity {
             startService(GCMRegistration);
         }
     }
-
+     //unused
     protected void unregisterWithGC() {
-
         if (checkPlayServices()) {
             Log.i(TAG, "GCM: Initiating Intent: unregistering with GCM");
             // Start IntentService to register this application with GCM.

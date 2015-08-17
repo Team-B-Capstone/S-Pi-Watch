@@ -28,8 +28,6 @@ import java.util.List;
 public class MobileListenerService extends WearableListenerService
         implements GoogleApiClient.ConnectionCallbacks {
 
-    //public final static String apiURL = "http://api.s-pi-demo.com/patients";
-    public static final String FIELD_QUERY_ON = "query_on";
     public static final String PATH_PATIENTS = "/patients";
     public static final String PATH_PATIENT = "/patient";
     public static final String PATH_QUERY_STATUS = "/query_status";
@@ -146,7 +144,6 @@ public class MobileListenerService extends WearableListenerService
                 Wearable.DataApi.putDataItem(mGoogleApiClient, put.asPutDataRequest()).await();
         Log.d(TAG, "Put results: " + status.getStatus().toString());
         //send each patient
-
         for(PutDataMapRequest p : parseJS(result)){
             Log.d(TAG, "Puting " + p.getUri().getPath());
             Wearable.DataApi.putDataItem(mGoogleApiClient, p.asPutDataRequest()).await();
@@ -169,7 +166,7 @@ public class MobileListenerService extends WearableListenerService
     //parses the json and returns a list of PutDataMaps for each patient with the path set to patient#
     private List<PutDataMapRequest> parseJS(String result) {
         ArrayList<PutDataMapRequest> putDataMapRequest = new ArrayList<>();
-        DataMap data;
+        //DataMap data;
         //Parse json
         //Create JSON object
         JSONObject allPatients, patient;
@@ -191,7 +188,6 @@ public class MobileListenerService extends WearableListenerService
         } catch (JSONException e) {
             Log.d(TAG, "JSON ERROR");
             e.printStackTrace();
-            return null;
         }
         return putDataMapRequest;
     }

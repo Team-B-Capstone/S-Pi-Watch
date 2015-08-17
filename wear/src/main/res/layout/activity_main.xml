@@ -15,7 +15,7 @@
         android:gravity="center"
         android:fontFamily="sans-serif-condensed-light"
         android:textColor="@android:color/white"
-        android:text="Waiting for data..." />
+        android:text="@string/waiting_for_data" />
 
     <android.support.wearable.view.GridViewPager
         android:id="@+id/pager"

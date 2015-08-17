@@ -13,11 +13,9 @@ import android.util.Log;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.MessageEvent;
-import com.google.android.gms.wearable.PutDataMapRequest;
-import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 
-import java.util.Map;
+import static edu.pdx.team_b_capstone2015.s_pi_watch.MainActivity.PATH_NOTIFICATION;
 
 
 //listens for notification messages
@@ -25,17 +23,15 @@ public class NotificationListenerService extends WearableListenerService
         implements GoogleApiClient.ConnectionCallbacks {
 
     private static final String TAG = "SPI-NotificationListSrv";
-    private static final String PATH_NOTIFICATION = "/Notification";
     private static final String ID = "PATIENT_ID";
-    private static final String TS = "TS";
-    private static final String SIGNAME = "SIGNAME";
-    private static final String INTERVAL = "INTERVAL";
-    private static final String ALERT_MSG = "ALERT_MSG";
-    private static final String ACTION_MSG = "ACTION_MSG";
+    //private static final String TS = "TS";
+    public static final String SIGNAME = "SIGNAME";
+    public static final String INTERVAL = "INTERVAL";
+    public static final String ALERT_MSG = "ALERT_MSG";
+    public static final String ACTION_MSG = "ACTION_MSG";
     private static final String TITLE = "title";
     private static final String NAME = "name";
     private static final String BED = "bed" ;
-    public static final String[] notificationKeys = {SIGNAME,INTERVAL,ALERT_MSG,ACTION_MSG,TS};
     public NotificationListenerService() {
     }
 

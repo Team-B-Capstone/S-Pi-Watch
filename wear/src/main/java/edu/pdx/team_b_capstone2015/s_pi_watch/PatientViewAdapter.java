@@ -39,14 +39,14 @@ import java.util.List;
 import java.util.Map;
 
 import static edu.pdx.team_b_capstone2015.s_pi_watch.MainActivity.*;
-
-public class PatientViewAdapter extends FragmentGridPagerAdapter {
+import static edu.pdx.team_b_capstone2015.s_pi_watch.NotificationListenerService.*;
+class PatientViewAdapter extends FragmentGridPagerAdapter {
 
     private static final int TRANSITION_DURATION_MILLIS = 100;
 
     private final Context mContext;
     private List<Row> mRows;
-    private ColorDrawable mDefaultBg;
+    private final ColorDrawable mDefaultBg;
     //private ColorDrawable mClearBg;
 
     public PatientViewAdapter(Context ctx, FragmentManager fm) {
@@ -148,7 +148,7 @@ public class PatientViewAdapter extends FragmentGridPagerAdapter {
 
 
     //array of background image ids.
-    static final int[] BG_IMAGES = new int[] {
+    private static final int[] BG_IMAGES = new int[] {
             R.drawable.background_row1,
             R.drawable.background_row2,
             R.drawable.background_row3,
@@ -184,7 +184,7 @@ public class PatientViewAdapter extends FragmentGridPagerAdapter {
     }
     //
     private Fragment fragment(String text) {
-        Resources res = mContext.getResources();
+        //Resources res = mContext.getResources();
         Fragment fragment = new CustomFragment();
         Bundle args = fragment.getArguments();
         //set args here.
@@ -194,7 +194,7 @@ public class PatientViewAdapter extends FragmentGridPagerAdapter {
     // Class for loading Backgrounds
     class DrawableLoadingTask extends AsyncTask<Integer, Void, Drawable> {
         private static final String TAG = "Loader";
-        private Context context;
+        private final Context context;
 
         DrawableLoadingTask(Context context) {
             this.context = context;
