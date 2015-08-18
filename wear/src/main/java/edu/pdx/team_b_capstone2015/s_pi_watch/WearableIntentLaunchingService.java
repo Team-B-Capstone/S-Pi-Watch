@@ -10,7 +10,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.CapabilityApi;
 import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import java.util.Set;
@@ -19,11 +18,7 @@ public class WearableIntentLaunchingService extends IntentService implements Goo
         GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = "SPI-IntentService";
-
-    public static final String QUERY_ON = "query_on";
-    private static final String PATH_QUERY_STATUS = "/query_status";
     public static final String ACTION_START_REQUEST = "action_start_request";
-    public static final String ACTION_CANCEL_REQUEST = "action_cancel_request";
     private static final String CAPABILITY_NAME = "Query_S-PI";
 
     // Timeout for making a connection to GoogleApiClient (in milliseconds).
@@ -72,19 +67,9 @@ public class WearableIntentLaunchingService extends IntentService implements Goo
                 //if the intent is a toggle request then connect and toggle the value of query_on.
                 if (intent.getAction().equals(ACTION_START_REQUEST)) {
                     Log.d(TAG, "start query request");
-                    Wearable.MessageApi.sendMessage(mGoogleApiClient, pickBestNodeId(result.getCapability().getNodes()), PATH_QUERY_STATUS, "Get_Patients".getBytes());
+                    Wearable.MessageApi.sendMessage(mGoogleApiClient, pickBestNodeId(result.getCapability().getNodes()), MainActivity.PATH_QUERY_STATUS, "Get_Patients".getBytes());
                     //query_on = true;
                 }
-                if(intent.getAction().equals(ACTION_CANCEL_REQUEST)) {
-                    Log.d(TAG, "Stop query request");
-                    //query_on = false;
-                }
-/*                //create the putDataMapRequest with path
-                PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(PATH_QUERY_STATUS);
-                //set the boolean field
-                putDataMapRequest.getDataMap().putBoolean(QUERY_ON, query_on);
-                //call the DataApi to update the shared values
-                Wearable.DataApi.putDataItem(mGoogleApiClient, putDataMapRequest.asPutDataRequest()).await();*/
 
             } else {
                 Log.e(TAG, "Failed to toggle alarm on phone - Client disconnected from Google Play "

@@ -16,9 +16,8 @@
 
 package edu.pdx.team_b_capstone2015.s_pi_watch;
 
-public class GcmPreferences {
+class GcmPreferences {
     public static final String SENT_TOKEN_TO_SERVER = "sentTokenToServer";
     public static final String REGISTRATION_COMPLETE = "registrationComplete";
-
 
 }

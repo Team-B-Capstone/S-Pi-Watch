@@ -19,32 +19,66 @@ package edu.pdx.team_b_capstone2015.s_pi_watch;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
+import com.google.android.gms.wearable.Wearable;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.List;
+import java.util.Set;
 
-public class SpiRegistrationIntentService extends IntentService  {
+public class SpiMobileIntentService extends IntentService implements GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
     private static String registrationToken;
-    private String host;// = "api.s-pi-demo.com";//"10.0.0.7";
-    int PORT = 9996;
+    private String host;
+    private final int PORT = 9996;
     private static final String TAG = "SPI-RegIntentService";
+    private static final String PATH_NOTIFICATION = "/Notification";
+    private GoogleApiClient mGoogleApiClient;
 
-    public SpiRegistrationIntentService() {
+    public SpiMobileIntentService() {
         super(TAG);
     }
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Wearable.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(mGoogleApiClient.isConnected()){
+            mGoogleApiClient.disconnect();
+        }
+    }
+
+    @Override
     protected void onHandleIntent(Intent intent) {
-        Log.i(TAG, "GCM: Preparing to handle intent");
+        Log.i(TAG, "handling intent");
         //SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         if(intent.getAction().contentEquals("REGISTER")){
             try {
@@ -82,6 +116,13 @@ public class SpiRegistrationIntentService extends IntentService  {
             }
             unregisterFromServer();
         }
+        if(intent.getAction().contentEquals("SEND_NOTIFICATION")) {
+            Log.i(TAG, "sending notificatation");
+            mGoogleApiClient.blockingConnect();
+            DataMap data = new DataMap();
+            data.putAll(DataMap.fromBundle(intent.getExtras()));
+            sendNotification( data);
+        }
     }
     /**
      * Send registration to our servers.
@@ -96,12 +137,9 @@ public class SpiRegistrationIntentService extends IntentService  {
 
                     Log.i(TAG, "GCM: Sending token to server at host: " + host + " and port: " + PORT + ": " + registrationToken);
                     Socket clientSocket = new Socket(host, PORT);
-//                    Socket clientSocket = new Socket("131.252.208.103", PORT);
                     DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-                    //outToServer.writeBytes("STRT"+registrationToken);
                     outToServer.writeBytes(registrationToken);
                     outToServer.flush();
-                    //outToServer.close();
 
                     //reciept from server is not working yet....
                     BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -135,5 +173,44 @@ public class SpiRegistrationIntentService extends IntentService  {
             }
         }).start();
     }
+
+    //sends a notification message to the wearable
+    private void sendNotification(DataMap dataMap) {
+
+        if (mGoogleApiClient.isConnected()) {
+            Wearable.MessageApi.sendMessage(mGoogleApiClient,
+                    pickBestNodeId(Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await().getNodes()),
+                    PATH_NOTIFICATION,
+                    dataMap.toByteArray());
+        }
+
+    }
+
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        //Log.d(TAG, "connected");
+    }
+
+    @Override
+    public void onConnectionSuspended(int cause) {
+        //Log.d(TAG, "connection suspendeded");
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+        //Log.d(TAG, "connection failed");
+    }
+    private String pickBestNodeId(List<Node> nodes) {
+        String bestNodeId = null;
+        // Find a nearby node or pick one arbitrarily
+        for (Node node : nodes) {
+            if (node.isNearby()) {
+                return node.getId();
+            }
+            bestNodeId = node.getId();
+        }
+        return bestNodeId;
+    }
+
 
 }

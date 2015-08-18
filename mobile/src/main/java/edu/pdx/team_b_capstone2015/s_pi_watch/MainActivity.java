@@ -3,32 +3,19 @@ package edu.pdx.team_b_capstone2015.s_pi_watch;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-
-import org.java_websocket.WebSocket;
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.handshake.ServerHandshake;
-
-import java.net.URI;
-import java.net.URISyntaxException;
 
 
 
 public class MainActivity extends Activity {
     private static final String TAG = "SPI-MAIN";
     private static boolean registered = false;
-    // Google Cloud Messaging helper objects:
-    //private BroadcastReceiver mRegistrationBroadcastReceiver;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     //private WebSocketClient mWebSocketClient;
     //private static final String WEBSOCKET_HOST = "ws://10.0.07:8080";
@@ -109,17 +96,16 @@ public class MainActivity extends Activity {
 
     //saved the app state when rotating, prevents multiple registrations.
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean("registered",registered);
     }
 
     @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        if(savedInstanceState != null){
-            registered = savedInstanceState.getBoolean("registered");
-        }
+        registered = savedInstanceState.getBoolean("registered");
+
     }
 
     @Override
@@ -134,18 +120,17 @@ public class MainActivity extends Activity {
         if (checkPlayServices()) {
             Log.i(TAG, "GCM: Initiating Intent: Registering with GCM");
             // Start IntentService to register this application with GCM.
-            Intent GCMRegistration = new Intent(MainActivity.this, SpiRegistrationIntentService.class);
+            Intent GCMRegistration = new Intent(MainActivity.this, SpiMobileIntentService.class);
             GCMRegistration.setAction("REGISTER");
             startService(GCMRegistration);
         }
     }
-
+     //unused
     protected void unregisterWithGC() {
-
         if (checkPlayServices()) {
             Log.i(TAG, "GCM: Initiating Intent: unregistering with GCM");
             // Start IntentService to register this application with GCM.
-            Intent GCMRegistration = new Intent(MainActivity.this, SpiRegistrationIntentService.class);
+            Intent GCMRegistration = new Intent(MainActivity.this, SpiMobileIntentService.class);
             GCMRegistration.setAction("UNREGISTER");
             startService(GCMRegistration);
         }

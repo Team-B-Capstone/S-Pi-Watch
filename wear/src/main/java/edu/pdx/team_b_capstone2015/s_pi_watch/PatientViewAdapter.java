@@ -1,3 +1,20 @@
+/**
+ * Copyright 2015 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package edu.pdx.team_b_capstone2015.s_pi_watch;
 
 import android.app.Fragment;
@@ -10,6 +27,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.wearable.view.GridViewPager;
 import android.util.LruCache;
 import android.support.wearable.view.CardFragment;
 import android.support.wearable.view.FragmentGridPagerAdapter;
@@ -21,51 +39,59 @@ import java.util.List;
 import java.util.Map;
 
 import static edu.pdx.team_b_capstone2015.s_pi_watch.MainActivity.*;
-
-public class PatientViewAdapter extends FragmentGridPagerAdapter {
-    //final Context mContext;
-
-    //public PatientViewAdapter(final Context context, FragmentManager fm) {
-    //    mContext = context.getApplicationContext();
-    //}
+import static edu.pdx.team_b_capstone2015.s_pi_watch.NotificationListenerService.*;
+class PatientViewAdapter extends FragmentGridPagerAdapter {
 
     private static final int TRANSITION_DURATION_MILLIS = 100;
 
     private final Context mContext;
     private List<Row> mRows;
-    private ColorDrawable mDefaultBg;
-
-    private ColorDrawable mClearBg;
+    private final ColorDrawable mDefaultBg;
+    //private ColorDrawable mClearBg;
 
     public PatientViewAdapter(Context ctx, FragmentManager fm) {
         super(fm);
         mContext = ctx;
-
         //list of rows for this adapter
-        mRows = new ArrayList<PatientViewAdapter.Row>();
+        buildRows();
+        mDefaultBg = new ColorDrawable(mContext.getResources().getColor(R.color.dark_grey));
+       // mClearBg = new ColorDrawable(mContext.getResources().getColor(android.R.color.transparent));
+
+    }
+
+    private void buildRows() {
+        mRows = new ArrayList<Row>();
+
         for(int i = 0; i < MAX_PATIENTS ; i++){
+            Map<String,String> p = patientData.get(i);
+            Row row = new Row();
             if(patientData.get(i)!= null){
-                Map<String,String> p = patientData.get(i);
+                row.add(cardFragment(p.get(NAME),"Patient ID: "+p.get(P_ID)
+                        +"\nBed: "+p.get(BED)
+                        +"\nStatus: "+p.get(STATUS)));
+                row.add(cardFragment("Patient Vitals", "Heart Rate: " + p.get(HEART_RATE)
+                        + "\nBlood Pressure: " + p.get(BP)
+                        + "\nTemp: " + p.get(TEMP)));
 
-                mRows.add(new Row(
-                        cardFragment(p.get(NAME),"Patient ID: "+p.get(P_ID)
-                                        +"\nBed: "+p.get(BED)
-                                        +"\nStatus: "+p.get(STATUS)),
-                        cardFragment("Patient Vitals", "Heart Rate: "+p.get(HEART_RATE)
-                                        +"\nBlood Pressure: "+p.get(BP)
-                                        +"\nTemp: "+p.get(TEMP)),
-                        cardFragment("Alerts", "TO BE IMPLEMENTED LATER"),//need integration with alert notifications
-                        cardFragment("Clinical Data", "Height: "+p.get(HEIGHT)
-                                        +"\nWeight: "+p.get(WEIGHT)
-                                        +"\nAllergies: "+p.get(ALLERGIES)),
-                        new CustomFragment(),
-                        new CustomFragment2()));
+                row.add(cardFragment("Clinical Data", "Height: "+p.get(HEIGHT)
+                        +"\nWeight: "+p.get(WEIGHT)
+                        +"\nAllergies: "+p.get(ALLERGIES)));
+                //add additional fragments to extend
+                //,new CustomFragment()
+                //,new CustomFragment2(
+
+                //Add alert column if available
+                if(p.get(SIGNAME) != null) {
+                    row.add(cardFragment("Last Alert", "Type: " + p.get(SIGNAME)
+                            + "\nLength: " + p.get(INTERVAL)
+                            + "\nMessage:\n" + p.get(ALERT_MSG)
+                            + "\nAction:\n"+ p.get(ACTION_MSG)));
+                }
             }
-        }
 
+            mRows.add(row);
+        }
         mRows.add(new Row(cardFragment(R.string.dismiss_title, R.string.dismiss_text)));
-        mDefaultBg = new ColorDrawable(R.color.dark_grey);
-        mClearBg = new ColorDrawable(android.R.color.transparent);
     }
 
 
@@ -105,7 +131,9 @@ public class PatientViewAdapter extends FragmentGridPagerAdapter {
 
     @Override
     public Drawable getBackgroundForPage(final int row, final int column) {
+        //Special backgrounds for specific pages is currently not implemented
         return mPageBackgrounds.get(new Point(column, row));
+
     }
 
     @Override
@@ -120,7 +148,7 @@ public class PatientViewAdapter extends FragmentGridPagerAdapter {
 
 
     //array of background image ids.
-    static final int[] BG_IMAGES = new int[] {
+    private static final int[] BG_IMAGES = new int[] {
             R.drawable.background_row1,
             R.drawable.background_row2,
             R.drawable.background_row3,
@@ -142,8 +170,7 @@ public class PatientViewAdapter extends FragmentGridPagerAdapter {
         CardFragment fragment =
                 CardFragment.create(title, text);
         // Add some extra bottom margin to leave room for the page indicator
-        fragment.setCardMarginBottom(
-                res.getDimensionPixelSize(R.dimen.card_margin_bottom));
+        fragment.setCardMarginBottom(res.getDimensionPixelSize(R.dimen.card_margin_bottom));
         return fragment;
     }
     //version of CardFragment with dynamic text, and no title
@@ -152,13 +179,12 @@ public class PatientViewAdapter extends FragmentGridPagerAdapter {
         CardFragment fragment =
                 CardFragment.create("",text);
         // Add some extra bottom margin to leave room for the page indicator
-        fragment.setCardMarginBottom(
-                res.getDimensionPixelSize(R.dimen.card_margin_bottom));
+        fragment.setCardMarginBottom(res.getDimensionPixelSize(R.dimen.card_margin_bottom));
         return fragment;
     }
     //
     private Fragment fragment(String text) {
-        Resources res = mContext.getResources();
+        //Resources res = mContext.getResources();
         Fragment fragment = new CustomFragment();
         Bundle args = fragment.getArguments();
         //set args here.
@@ -168,7 +194,7 @@ public class PatientViewAdapter extends FragmentGridPagerAdapter {
     // Class for loading Backgrounds
     class DrawableLoadingTask extends AsyncTask<Integer, Void, Drawable> {
         private static final String TAG = "Loader";
-        private Context context;
+        private final Context context;
 
         DrawableLoadingTask(Context context) {
             this.context = context;
@@ -200,26 +226,26 @@ public class PatientViewAdapter extends FragmentGridPagerAdapter {
             return mDefaultBg;
         }
     };
-    // Background for specific row/column
+    // Code below allows for a different Background for specific row/column
     LruCache<Point, Drawable> mPageBackgrounds = new LruCache<Point, Drawable>(3) {
         @Override
         protected Drawable create(final Point page) {
-            // place bugdroid as the background at row 3, column 2
-            if (page.y == 3 && page.x == 2) {
-                int resid = R.drawable.red;
-                new DrawableLoadingTask(mContext) {
-                    @Override
-                    protected void onPostExecute(Drawable result) {
-                        TransitionDrawable background = new TransitionDrawable(new Drawable[] {
-                                mClearBg,
-                                result
-                        });
-                        mPageBackgrounds.put(page, background);
-                        notifyPageBackgroundChanged(page.y, page.x);
-                        background.startTransition(TRANSITION_DURATION_MILLIS);
-                    }
-                }.execute(resid);
-            }
+            // place a red background at row 3, column 2
+//            if (page.y == 3 && page.x == 2) {
+//                int resid = R.drawable.red;
+//                new DrawableLoadingTask(mContext) {
+//                    @Override
+//                    protected void onPostExecute(Drawable result) {
+//                        TransitionDrawable background = new TransitionDrawable(new Drawable[] {
+//                                mClearBg,
+//                                result
+//                        });
+//                        mPageBackgrounds.put(page, background);
+//                        notifyPageBackgroundChanged(page.y, page.x);
+//                        background.startTransition(TRANSITION_DURATION_MILLIS);
+//                    }
+//                }.execute(resid);
+//            }
             return GridPagerAdapter.BACKGROUND_NONE;
         }
     };
