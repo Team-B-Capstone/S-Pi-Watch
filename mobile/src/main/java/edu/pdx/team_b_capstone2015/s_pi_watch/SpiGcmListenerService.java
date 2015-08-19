@@ -62,10 +62,6 @@ public class SpiGcmListenerService extends GcmListenerService {
         if ((title != null) && title.contentEquals("SPI ALERT!")
                 && PreferenceManager.getDefaultSharedPreferences(this).getBoolean("pref_GCMNotifications", false)) {
             alert = parseJSON(data.getString("message"));
-            //alert.put(NAME, data.getString(NAME, "Unknown"));
-            //String id = alert.get(ID);
-            //Uri uri = Uri.parse("wear:/patient"+id);
-            //alert.put(BED, data.getString(BED,"N/A"));
             alert.put(TITLE, data.getString(TITLE, "Alert!"));
             Intent send = new Intent(this, SpiMobileIntentService.class).setAction("SEND_NOTIFICATION");
             //put all the alert data into the Intent
