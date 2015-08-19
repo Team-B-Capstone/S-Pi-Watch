@@ -48,6 +48,8 @@ public class MobileListenerService extends WearableListenerService
     private static final String WEIGHT = "weight";
     private static final String HEART_RATE = "heart-rate";
     private static final String P_ID= "patient_id";
+    private static final String NOTES = "notes";
+    private static final String DATE = "date";
     private static final String[] keys = {NAME,BED,ID,AGE,TEMP,HEIGHT,BP,STATUS,CASE_ID,H_ID,CARDIAC,ALLERGIES,WEIGHT,HEART_RATE,P_ID};
     private static final byte[] DATA_AVAILABLE = "Data_available".getBytes() ;
     private static final String GET_PATIENTS = "Get_Patients";
@@ -65,9 +67,9 @@ public class MobileListenerService extends WearableListenerService
     public void onDestroy() {
         super.onDestroy();
         //Log.d(TAG, "onDestroy");
-        if (mGoogleApiClient.isConnected() || mGoogleApiClient.isConnecting()) {
-            mGoogleApiClient.disconnect();
-        }
+//        if (mGoogleApiClient.isConnected() || mGoogleApiClient.isConnecting()) {
+//            mGoogleApiClient.disconnect();
+//        }
 
     }
 
@@ -145,7 +147,7 @@ public class MobileListenerService extends WearableListenerService
         Log.d(TAG, "Put results: " + status.getStatus().toString());
         //send each patient
         for(PutDataMapRequest p : parseJS(result)){
-            Log.d(TAG, "Puting " + p.getUri().getPath());
+            //Log.d(TAG, "Puting " + p.getUri().getPath());
             Wearable.DataApi.putDataItem(mGoogleApiClient, p.asPutDataRequest()).await();
         }
 
@@ -165,7 +167,7 @@ public class MobileListenerService extends WearableListenerService
 
     //parses the json and returns a list of PutDataMaps for each patient with the path set to patient#
     private List<PutDataMapRequest> parseJS(String result) {
-        ArrayList<PutDataMapRequest> putDataMapRequest = new ArrayList<>();
+        ArrayList<PutDataMapRequest> putDataMapRequestArray = new ArrayList<>();
         //DataMap data;
         //Parse json
         //Create JSON object
@@ -174,22 +176,19 @@ public class MobileListenerService extends WearableListenerService
             allPatients = new JSONObject(result);
             for (int i = 0; i < 4; i++){
                 patient = new JSONObject(allPatients.getString( Integer.toString(i+1) )); //patient ids are 1-4 in json
-                PutDataMapRequest put = PutDataMapRequest.create(PATH_PATIENT + Integer.toString(i));//patient paths are /patient0 - /patient3
+                PutDataMapRequest patientPDMR = PutDataMapRequest.create(PATH_PATIENT + Integer.toString(i));//patient paths are /patient0 - /patient3
+                Log.d(TAG,patientPDMR.getUri().toString());
                 for(String k : keys){
-                    if(k.contains(TEMP)){
-                        put.getDataMap().putString(k, Integer.toString(Double.valueOf(patient.getString(k)).intValue())); //temp needs to be a int
-                    }else {
-                        put.getDataMap().putString(k, patient.getString(k));
-                    }
+                    patientPDMR.getDataMap().putString(k, patient.getString(k));
                 }
-                putDataMapRequest.add(put);
+                putDataMapRequestArray.add(patientPDMR);
             }
 
         } catch (JSONException e) {
             Log.d(TAG, "JSON ERROR");
             e.printStackTrace();
         }
-        return putDataMapRequest;
+        return putDataMapRequestArray;
     }
 
 }

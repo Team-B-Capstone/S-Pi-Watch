@@ -19,6 +19,7 @@ package edu.pdx.team_b_capstone2015.s_pi_watch;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
@@ -30,6 +31,8 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.DataItem;
+import com.google.android.gms.wearable.DataItemBuffer;
 import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
@@ -71,9 +74,9 @@ public class SpiMobileIntentService extends IntentService implements GoogleApiCl
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(mGoogleApiClient.isConnected()){
-            mGoogleApiClient.disconnect();
-        }
+//        if(mGoogleApiClient.isConnected()){
+//            mGoogleApiClient.disconnect();
+//        }
     }
 
     @Override
@@ -117,11 +120,19 @@ public class SpiMobileIntentService extends IntentService implements GoogleApiCl
             unregisterFromServer();
         }
         if(intent.getAction().contentEquals("SEND_NOTIFICATION")) {
-            Log.i(TAG, "sending notificatation");
+            //Log.i(TAG, "sending notificatation");
             mGoogleApiClient.blockingConnect();
+            //get patient data
             DataMap data = new DataMap();
             data.putAll(DataMap.fromBundle(intent.getExtras()));
-            sendNotification( data);
+            String id = data.getString("PATIENT_ID");
+            Uri uri = Uri.parse("wear:/patient" + id);
+            //get patient data from
+            DataItemBuffer dataItemBuffer = Wearable.DataApi.getDataItems(mGoogleApiClient, uri).await();
+            data.putString("NAME",DataMap.fromByteArray(dataItemBuffer.get(0).getData()).getString("name","Unknown"));
+            data.putString("BED", DataMap.fromByteArray(dataItemBuffer.get(0).getData()).getString("bed","N/A"));
+            Log.d(TAG,"sending notification: "+data.keySet().toString());
+            sendNotification(data);
         }
     }
     /**
@@ -182,8 +193,8 @@ public class SpiMobileIntentService extends IntentService implements GoogleApiCl
                     pickBestNodeId(Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await().getNodes()),
                     PATH_NOTIFICATION,
                     dataMap.toByteArray());
+            mGoogleApiClient.disconnect();
         }
-
     }
 
     @Override
