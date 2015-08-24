@@ -17,6 +17,7 @@
 package edu.pdx.team_b_capstone2015.s_pi_watch;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -39,9 +40,9 @@ public class SpiGcmListenerService extends GcmListenerService {
     private static final String ALERT_MSG = "ALERT_MSG";
     private static final String ACTION_MSG = "ACTION_MSG";
     private static final String[] keys = {ID, TS, SIGNAME, INTERVAL, ALERT_MSG, ACTION_MSG};
-    private static final String TITLE = "title";
-    private static final String NAME = "name";
-    private static final String BED = "bed" ;
+    private static final String TITLE = "TITLE";
+//    private static final String NAME = "name";
+//    private static final String BED = "bed" ;
 
 
     /**
@@ -55,16 +56,15 @@ public class SpiGcmListenerService extends GcmListenerService {
     @Override
     public void onMessageReceived(String from, Bundle data) {
 
-        Log.d(TAG, "Message: " + data.getString("message"));
+        Log.d(TAG, "Message Received");
         Map<String, String> alert;
-        String title = data.getString(TITLE);
+        String title = data.getString("title");
         if ((title != null) && title.contentEquals("SPI ALERT!")
                 && PreferenceManager.getDefaultSharedPreferences(this).getBoolean("pref_GCMNotifications", false)) {
             alert = parseJSON(data.getString("message"));
-            alert.put(NAME, data.getString(NAME, "Unknown"));
-            alert.put(BED, data.getString(BED,"N/A"));
             alert.put(TITLE, data.getString(TITLE, "Alert!"));
             Intent send = new Intent(this, SpiMobileIntentService.class).setAction("SEND_NOTIFICATION");
+            //put all the alert data into the Intent
             for(String s: alert.keySet()){
                 send.putExtra(s,alert.get(s));
             }
@@ -79,7 +79,6 @@ public class SpiGcmListenerService extends GcmListenerService {
         JSONObject alert;
         try {
             alert = new JSONObject(result);
-            dataMap.put(TITLE,"ALERT:");
             for (String s : keys) {
                 //Log.d(TAG, s + " is " + alert.get(s));
                 dataMap.put(s, alert.getString(s));

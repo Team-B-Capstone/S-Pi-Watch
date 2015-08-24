@@ -29,9 +29,9 @@ public class NotificationListenerService extends WearableListenerService
     public static final String INTERVAL = "INTERVAL";
     public static final String ALERT_MSG = "ALERT_MSG";
     public static final String ACTION_MSG = "ACTION_MSG";
-    private static final String TITLE = "title";
-    private static final String NAME = "name";
-    private static final String BED = "bed" ;
+    private static final String TITLE = "TITLE";
+    private static final String NAME = "NAME";
+    private static final String BED = "BED" ;
     public NotificationListenerService() {
     }
 

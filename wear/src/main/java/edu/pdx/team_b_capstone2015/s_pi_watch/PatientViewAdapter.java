@@ -71,10 +71,10 @@ class PatientViewAdapter extends FragmentGridPagerAdapter {
                         +"\nStatus: "+p.get(STATUS)));
                 row.add(cardFragment("Patient Vitals", "Heart Rate: " + p.get(HEART_RATE)
                         + "\nBlood Pressure: " + p.get(BP)
-                        + "\nTemp: " + p.get(TEMP)));
+                        + "\nTemp(F): " + p.get(TEMP)));
 
-                row.add(cardFragment("Clinical Data", "Height: "+p.get(HEIGHT)
-                        +"\nWeight: "+p.get(WEIGHT)
+                row.add(cardFragment("Clinical Data", "Height(cm): "+p.get(HEIGHT)
+                        +"\nWeight(kg): "+p.get(WEIGHT)
                         +"\nAllergies: "+p.get(ALLERGIES)));
                 //add additional fragments to extend
                 //,new CustomFragment()
